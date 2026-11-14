@@ -1,5 +1,6 @@
 import './style.css';
-import { renderDiagnostics } from './diagnostics';
+import { renderMore } from './more';
+import { backupDue } from './backup';
 import { registerSW } from './sw-register';
 import { renderList, renderScan, stopScan } from './ui';
 
@@ -15,7 +16,7 @@ function show(tab: Tab) {
   if (tab === 'scan') renderScan(view);
   else if (tab === 'collection') renderList(view, 'have');
   else if (tab === 'wants') renderList(view, 'want');
-  else renderDiagnostics(view);
+  else renderMore(view);
 }
 
 document.getElementById('tabs')!.addEventListener('click', (e) => {
@@ -27,3 +28,6 @@ let start: Tab = 'collection';
 try { const s = localStorage.getItem('tab'); if (s === 'scan' || s === 'collection' || s === 'wants' || s === 'more') start = s; } catch { /* ignore */ }
 show(start);
 registerSW();
+// Ask the browser to keep our data; harmless if refused.
+try { navigator.storage?.persist?.(); } catch { /* ignore */ }
+backupDue().then((due) => { if (due) document.getElementById('tabs')!.querySelector('[data-tab=more]')!.classList.add('badge'); }).catch(() => {});

@@ -78,8 +78,8 @@ export async function runChecks(): Promise<Result[]> {
   return out;
 }
 
-export function renderDiagnostics(root: HTMLElement) {
-  root.innerHTML = `<h1>More</h1><h2>Self-check</h2>
+export function renderDiagnostics(root: HTMLElement, _embedded = false) {
+  root.innerHTML = `<h2>Self-check</h2>
     <div class="card" id="diag"><span class="dim">Running…</span></div>
     <button class="primary" id="diag-rerun">Run again</button>
     <button class="secondary" id="diag-copy">Copy report</button>
@@ -99,4 +99,4 @@ export function renderDiagnostics(root: HTMLElement) {
   go();
 }
 
-const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+export const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));

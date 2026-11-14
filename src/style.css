@@ -34,3 +34,4 @@ label { display:block; color:var(--dim); font-size:14px; }
 .filebtn { display:flex; align-items:center; justify-content:center; width:100%; margin:8px 0; text-align:center; padding:8px 18px; border:1px solid #2c4a80; background:transparent; }
 .typed { display:flex; gap:8px; } .typed button { flex:none; }
 .card.ok { outline:2px solid var(--ok); }
+nav#tabs button.badge::after { content:' •'; color: var(--warn); }
