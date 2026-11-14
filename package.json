@@ -1,0 +1,25 @@
+{
+  "name": "can-tracker",
+  "version": "0.1.0",
+  "description": "Red Bull can collection tracker (PWA)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "idb": "^8.0.4",
+    "minisearch": "^7.2.0",
+    "zxing-wasm": "^3.1.6"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.8",
+    "happy-dom": "^21.0.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}
