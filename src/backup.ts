@@ -1,5 +1,5 @@
 import type { Can } from './types';
-import { allCans, db } from './db';
+import { allCans, db, notifyChanged } from './db';
 
 export const FORMAT = 'can-tracker';
 export const VERSION = 1;
@@ -58,6 +58,7 @@ export async function applyMerge(plan: Plan) {
   const tx = d.transaction('cans', 'readwrite');
   for (const c of [...plan.add, ...plan.update]) tx.store.put(c);
   await tx.done;
+  notifyChanged();
 }
 
 export async function restoreSnapshot(): Promise<number> {
@@ -68,6 +69,7 @@ export async function restoreSnapshot(): Promise<number> {
   await tx.store.clear();
   for (const c of s.cans) tx.store.put(c);
   await tx.done;
+  notifyChanged();
   return s.cans.length;
 }
 export async function snapshotInfo(): Promise<{ at: number; count: number } | null> {

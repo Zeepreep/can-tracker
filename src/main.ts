@@ -1,6 +1,7 @@
 import './style.css';
 import { renderMore } from './more';
 import { backupDue } from './backup';
+import { getConfig, syncNow } from './sync';
 import { registerSW } from './sw-register';
 import { renderList, renderScan, stopScan } from './ui';
 
@@ -31,3 +32,14 @@ registerSW();
 // Ask the browser to keep our data; harmless if refused.
 try { navigator.storage?.persist?.(); } catch { /* ignore */ }
 backupDue().then((due) => { if (due) document.getElementById('tabs')!.querySelector('[data-tab=more]')!.classList.add('badge'); }).catch(() => {});
+
+// Auto-sync: on open, when returning to the app, and 4s after any edit. Silent on failure (local data is the source of truth).
+let syncTimer: number | undefined; let syncing = false;
+async function autoSync() {
+  if (syncing || !(await getConfig())) return;
+  syncing = true;
+  try { await syncNow(); } finally { syncing = false; }
+}
+window.addEventListener('cans-changed', () => { clearTimeout(syncTimer); syncTimer = window.setTimeout(autoSync, 4000); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) autoSync(); });
+autoSync();

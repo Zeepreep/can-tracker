@@ -1,6 +1,6 @@
-const VERSION = '43ccb9e940';
+const VERSION = 'a6846726f3';
 const CACHE = 'can-tracker-' + VERSION;
-const FILES = ["./","./apple-touch-icon.png","./assets/index-BowlvsMx.js","./assets/index-CE1VG0Oo.css","./assets/reader-Bc_vmJBa.js","./icon-192.png","./icon-512.png","./index.html","./manifest.webmanifest","./zxing_reader.wasm"];
+const FILES = ["./","./apple-touch-icon.png","./assets/index-CE1VG0Oo.css","./assets/index-PAXqh4nN.js","./assets/reader-Bc_vmJBa.js","./icon-192.png","./icon-512.png","./index.html","./manifest.webmanifest","./zxing_reader.wasm"];
 
 self.addEventListener('install', (e) => {
   // Do NOT skipWaiting: the page asks the user before swapping versions.

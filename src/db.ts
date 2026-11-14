@@ -18,6 +18,8 @@ export function db() {
 }
 export function resetDbForTests() { dbp = null; }
 
+export const notifyChanged = () => { try { window.dispatchEvent(new Event('cans-changed')); } catch { /* no window */ } };
+
 export const newId = () =>
   (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
 
@@ -47,6 +49,7 @@ export async function saveCan(input: Partial<Can> & Pick<Can, 'name'>): Promise<
   };
   if (!can.name) throw new Error('Name is required');
   await (await db()).put('cans', can);
+  notifyChanged();
   return can;
 }
 
@@ -55,10 +58,12 @@ export async function deleteCan(id: string) {
   const c = await getCan(id);
   if (!c) return;
   await (await db()).put('cans', { ...c, deleted: true, updatedAt: Date.now() });
+  notifyChanged();
 }
 export async function restoreCan(id: string) {
   const c = await getCan(id);
   if (c) await (await db()).put('cans', { ...c, deleted: false, updatedAt: Date.now() });
+  notifyChanged();
 }
 
 /** Mark a wanted can as found (the "found it" flow). */
@@ -67,5 +72,6 @@ export async function markHave(id: string) {
   if (!c) return;
   const n = { ...c, status: 'have' as const, updatedAt: Date.now() };
   await (await db()).put('cans', n);
+  notifyChanged();
   return n;
 }

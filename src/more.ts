@@ -1,11 +1,13 @@
 import { makeBackup, parseBackup, planMerge, applyMerge, markBackedUp, lastBackup, restoreSnapshot, snapshotInfo } from './backup';
 import { allCans } from './db';
 import { renderDiagnostics, esc } from './diagnostics';
+import { getConfig, setConfig, syncNow, lastSync } from './sync';
 
 export async function renderMore(root: HTMLElement) {
   const n = (await allCans()).length;
   const lb = await lastBackup();
   const snap = await snapshotInfo();
+  const sc = await getConfig(); const ls = await lastSync();
   root.innerHTML = `<h1>More</h1>
     <h2>Backup</h2>
     <div class="card"><div>${n} cans stored on this phone.</div>
@@ -14,6 +16,16 @@ export async function renderMore(root: HTMLElement) {
       <label class="btn secondary filebtn">Restore from backup file<input id="imp" type="file" accept=".json,application/json" hidden></label>
       <div id="imp-out"></div>
       ${snap ? `<button class="secondary" id="undo-imp" style="width:100%">Undo last restore (${snap.count} cans from ${new Date(snap.at).toLocaleString()})</button>` : ''}
+    </div>
+    <h2>Sync (optional)</h2>
+    <div class="card">
+      <div class="dim" style="font-size:14px">${sc ? 'Connected to ' + esc(sc.owner + '/' + sc.repo) + (ls ? '. Last sync ' + new Date(ls).toLocaleString() : '.') : 'Keeps a copy of the collection in your private GitHub data repo.'}</div>
+      <label>GitHub user<input id="s-owner" value="${esc(sc?.owner ?? 'Zeepreep')}" autocapitalize="off" autocorrect="off"></label>
+      <label>Data repo<input id="s-repo" value="${esc(sc?.repo ?? 'can-tracker-data')}" autocapitalize="off" autocorrect="off"></label>
+      <label>Access token<input id="s-token" type="password" value="${esc(sc?.token ?? '')}" autocapitalize="off" autocorrect="off" placeholder="github_pat_…"></label>
+      <button class="primary" id="s-go" style="width:100%">${sc ? 'Save and sync now' : 'Connect and sync'}</button>
+      ${sc ? '<button class="secondary" id="s-off" style="width:100%;margin-top:8px">Disconnect</button>' : ''}
+      <div id="s-out" style="margin-top:8px"></div>
     </div>
     <div id="diag-root"></div>`;
   root.querySelector('#exp')!.addEventListener('click', async () => {
@@ -38,5 +50,15 @@ export async function renderMore(root: HTMLElement) {
   root.querySelector('#undo-imp')?.addEventListener('click', async () => {
     if (confirm('Go back to how your collection was before the last restore?')) { await restoreSnapshot(); renderMore(root); }
   });
+  const sout = root.querySelector<HTMLElement>('#s-out')!;
+  root.querySelector('#s-go')!.addEventListener('click', async () => {
+    const v = (id: string) => root.querySelector<HTMLInputElement>('#' + id)!.value.trim();
+    const cfg = { owner: v('s-owner'), repo: v('s-repo'), token: v('s-token'), path: 'collection.json' };
+    sout.innerHTML = '<span class="dim">Syncing…</span>';
+    const r = await syncNow(cfg);
+    if (r.ok) { await setConfig(cfg); renderMore(root); }
+    else sout.innerHTML = `<span class="fail">${esc(r.message)}</span>`;
+  });
+  root.querySelector('#s-off')?.addEventListener('click', async () => { await setConfig(null); renderMore(root); });
   renderDiagnostics(root.querySelector<HTMLElement>('#diag-root')!, true);
 }
