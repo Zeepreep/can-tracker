@@ -11,7 +11,9 @@ export const tokens = (s: string) => norm(s).split(' ').filter((t) => t.length >
 
 /** Distinctive query tokens from OCR. When a collection is supplied, OCR is corrected
  * against words that actually occur on those cans; unrelated OCR fragments are discarded. */
-export function queryTokens(words: OcrWord[], minConf = 45, catalogue: Can[] = []): string[] {
+export function queryTokens(words: OcrWord[], minConf = 45, catalogue?: Can[]): string[] {
+  const cans = catalogue ?? [];
+  const useLexicon = catalogue !== undefined;
   // The bundled flavour/colour glossary supplies known label vocabulary even for cans
   // that are not yet in the user's collection. Collection terms take priority.
   const canonical = new Map<string, string>();
@@ -21,7 +23,7 @@ export function queryTokens(words: OcrWord[], minConf = 45, catalogue: Can[] = [
     for (const token of singleWords) if (!NOISE.has(token) && !canonical.has(token)) canonical.set(token, root);
   }
   const vocabulary = new Map<string, string>();
-  for (const can of catalogue) {
+  for (const can of cans) {
     const source = [can.name, can.flavor, can.tagline].filter(Boolean).join(' ');
     for (const token of tokens(expand(source))) {
       if (/^[a-z]+$/.test(token) && !NOISE.has(token)) vocabulary.set(token, canonical.get(token) ?? token);
@@ -33,9 +35,9 @@ export function queryTokens(words: OcrWord[], minConf = 45, catalogue: Can[] = [
   for (const word of words) {
     if (word.confidence < minConf) continue;
     for (const raw of tokens(word.text)) {
-      if (!(catalogue.length ? /^[a-z0-9]+$/ : /^[a-z]+$/).test(raw) || NOISE.has(raw)) continue;
+      if (!(useLexicon ? /^[a-z0-9]+$/ : /^[a-z]+$/).test(raw) || NOISE.has(raw)) continue;
       let corrected = raw;
-      if (catalogue.length) {
+      if (useLexicon) {
         let best = 0;
         let bestRoots = new Set<string>();
         for (const candidate of known) {
@@ -111,8 +113,8 @@ export function rankCans(qTokens: string[], cans: Can[]): Candidate[] {
 }
 
 /** Starting point for the "new can" form: only words that were read confidently. */
-export function guessName(words: OcrWord[], catalogue: Can[] = []): string {
-  const keep = catalogue.length ? queryTokens(words, 25, catalogue) : words.filter((w) => w.confidence >= 60).flatMap((w) => tokens(w.text)).filter((t) => /^[a-z]+$/.test(t) && !NOISE.has(t));
+export function guessName(words: OcrWord[], catalogue?: Can[]): string {
+  const keep = catalogue !== undefined ? queryTokens(words, 25, catalogue) : words.filter((w) => w.confidence >= 60).flatMap((w) => tokens(w.text)).filter((t) => /^[a-z]+$/.test(t) && !NOISE.has(t));
   const uniq = [...new Set(keep)].slice(0, 5);
   const title = uniq.map((t) => t[0].toUpperCase() + t.slice(1)).join(' ');
   return title ? `Red Bull ${title}` : 'Red Bull';
