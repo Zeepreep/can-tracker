@@ -1,3 +1,5 @@
+import { t } from './i18n';
+
 declare const __BUILD_TIME__: string;
 
 type Result = { name: string; status: 'pass' | 'fail' | 'warn'; detail: string };
@@ -79,15 +81,15 @@ export async function runChecks(): Promise<Result[]> {
 }
 
 export function renderDiagnostics(root: HTMLElement, _embedded = false) {
-  root.innerHTML = `<h2>Self-check</h2>
-    <div class="card" id="diag"><span class="dim">Running…</span></div>
-    <button class="primary" id="diag-rerun">Run again</button>
-    <button class="secondary" id="diag-copy">Copy report</button>
-    <h2>Report</h2><textarea id="diag-text" readonly></textarea>`;
+  root.innerHTML = `<h2>${t('Self-check')}</h2>
+    <div class="card" id="diag"><span class="dim">${t('Running…')}</span></div>
+    <button class="primary" id="diag-rerun">${t('Run again')}</button>
+    <button class="secondary" id="diag-copy">${t('Copy report')}</button>
+    <h2>${t('Report')}</h2><textarea id="diag-text" readonly></textarea>`;
   const box = root.querySelector<HTMLElement>('#diag')!;
   const text = root.querySelector<HTMLTextAreaElement>('#diag-text')!;
   const go = async () => {
-    box.innerHTML = '<span class="dim">Running…</span>';
+    box.innerHTML = `<span class="dim">${t('Running…')}</span>`;
     const res = await runChecks();
     box.innerHTML = res.map((r) => `<div class="row"><span>${esc(r.name)}</span><span class="${r.status}">${r.status.toUpperCase()}</span></div><div class="dim" style="font-size:13px;word-break:break-all">${esc(r.detail)}</div>`).join('');
     text.value = res.map((r) => `[${r.status}] ${r.name}: ${r.detail}`).join('\n');

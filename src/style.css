@@ -36,3 +36,4 @@ label { display:block; color:var(--dim); font-size:14px; }
 .card.ok { outline:2px solid var(--ok); }
 nav#tabs button.badge::after { content:' •'; color: var(--warn); }
 .swatch { display:inline-block; width:18px; height:18px; border-radius:9px; margin-left:8px; vertical-align:-3px; border:1px solid #fff6; }
+#update-bar[hidden] { display:none; }

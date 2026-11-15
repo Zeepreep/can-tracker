@@ -1,6 +1,7 @@
 import type { Can } from './types';
 import { db, allCans } from './db';
 import { parseBackup, FORMAT, VERSION } from './backup';
+import { t } from './i18n';
 
 export interface SyncConfig { token: string; owner: string; repo: string; path: string; }
 export type SyncResult =
@@ -42,26 +43,26 @@ function headers(c: SyncConfig) {
 
 export async function syncNow(cfg?: SyncConfig | null, f: typeof fetch = fetch): Promise<SyncResult> {
   const c = cfg ?? (await getConfig());
-  if (!c || !c.token || !c.owner || !c.repo) return { ok: false, reason: 'config', message: 'Sync is not set up.' };
+  if (!c || !c.token || !c.owner || !c.repo) return { ok: false, reason: 'config', message: t('Sync is not set up.') };
   const url = `${API}/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/contents/${c.path.split('/').map(encodeURIComponent).join('/')}`;
   try {
     for (let attempt = 0; attempt < 3; attempt++) {
       const g = await f(url, { headers: headers(c), cache: 'no-store' });
       let remote: Can[] = []; let sha: string | undefined;
-      if (g.status === 401 || g.status === 403) return { ok: false, reason: 'auth', message: 'GitHub rejected the token. It may have expired or lacks access to the data repo.' };
+      if (g.status === 401 || g.status === 403) return { ok: false, reason: 'auth', message: t('GitHub rejected the token. It may have expired or lacks access to the data repo.') };
       if (g.status === 404) {
         // path missing is fine (first sync); a missing repo is not. Distinguish by checking the repo.
         const rr = await f(`${API}/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}`, { headers: headers(c) });
-        if (rr.status === 404) return { ok: false, reason: 'notfound', message: 'Data repo not found. Check owner/name and token access.' };
-        if (rr.status === 401 || rr.status === 403) return { ok: false, reason: 'auth', message: 'GitHub rejected the token.' };
+        if (rr.status === 404) return { ok: false, reason: 'notfound', message: t('Data repo not found. Check owner/name and token access.') };
+        if (rr.status === 401 || rr.status === 403) return { ok: false, reason: 'auth', message: t('GitHub rejected the token.') };
       } else if (g.ok) {
         const j = await g.json();
         sha = j.sha;
-        if (j.encoding !== 'base64' || typeof j.content !== 'string') return { ok: false, reason: 'toolarge', message: 'The data file is too large for sync.' };
+        if (j.encoding !== 'base64' || typeof j.content !== 'string') return { ok: false, reason: 'toolarge', message: t('The data file is too large for sync.') };
         const p = parseBackup(b64dec(j.content));
-        if (p.error) return { ok: false, reason: 'badremote', message: 'The file in the data repo is not valid. Nothing was changed.' };
+        if (p.error) return { ok: false, reason: 'badremote', message: t('The file in the data repo is not valid. Nothing was changed.') };
         remote = p.cans;
-      } else return { ok: false, reason: 'network', message: `GitHub answered ${g.status}.` };
+      } else return { ok: false, reason: 'network', message: t('GitHub answered {s}.', { s: g.status }) };
 
       const local = await allCans(true);
       const { merged, localChanged, remoteDiffers } = mergeAll(local, remote);
@@ -78,17 +79,17 @@ export async function syncNow(cfg?: SyncConfig | null, f: typeof fetch = fetch):
           body: JSON.stringify({ message: 'Update collection', content: b64enc(JSON.stringify(body, null, 1)), ...(sha ? { sha } : {}) }),
         });
         if (put.status === 409 || put.status === 422) continue; // someone else wrote first: refetch and merge again
-        if (put.status === 401 || put.status === 403) return { ok: false, reason: 'auth', message: 'Token can read but not write. It needs "Contents: Read and write".' };
-        if (!put.ok) return { ok: false, reason: 'network', message: `GitHub answered ${put.status} on save.` };
+        if (put.status === 401 || put.status === 403) return { ok: false, reason: 'auth', message: t('Token can read but not write. It needs "Contents: Read and write".') };
+        if (!put.ok) return { ok: false, reason: 'network', message: t('GitHub answered {s} on save.', { s: put.status }) };
         pushed = true;
       }
       const at = Date.now();
       await (await db()).put('meta', at, 'lastSync');
       return { ok: true, pulled: localChanged.length, pushed, at };
     }
-    return { ok: false, reason: 'conflict', message: 'Could not save after several tries. Try again in a moment.' };
+    return { ok: false, reason: 'conflict', message: t('Could not save after several tries. Try again in a moment.') };
   } catch {
-    return { ok: false, reason: 'network', message: 'No connection to GitHub. Your data is safe on this phone.' };
+    return { ok: false, reason: 'network', message: t('No connection to GitHub. Your data is safe on this phone.') };
   }
 }
 export async function lastSync(): Promise<number | null> { return ((await (await db()).get('meta', 'lastSync')) as number | undefined) ?? null; }

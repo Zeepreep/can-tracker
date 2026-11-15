@@ -4,12 +4,15 @@ import { backupDue } from './backup';
 import { getConfig, syncNow } from './sync';
 import { registerSW } from './sw-register';
 import { renderList, renderScan, stopScan } from './ui';
+import { applyStatic } from './i18n';
 
 type Tab = 'scan' | 'collection' | 'wants' | 'more';
 const view = document.getElementById('view')!;
 
 
+let current: Tab = 'collection';
 function show(tab: Tab) {
+  current = tab;
   document.querySelectorAll<HTMLButtonElement>('#tabs button').forEach((b) =>
     b.classList.toggle('active', b.dataset.tab === tab));
   try { localStorage.setItem('tab', tab); } catch { /* ignore */ }
@@ -27,8 +30,10 @@ document.getElementById('tabs')!.addEventListener('click', (e) => {
 
 let start: Tab = 'collection';
 try { const s = localStorage.getItem('tab'); if (s === 'scan' || s === 'collection' || s === 'wants' || s === 'more') start = s; } catch { /* ignore */ }
+applyStatic();
 show(start);
 registerSW();
+window.addEventListener('lang-changed', () => { applyStatic(); show(current); });
 // Ask the browser to keep our data; harmless if refused.
 try { navigator.storage?.persist?.(); } catch { /* ignore */ }
 backupDue().then((due) => { if (due) document.getElementById('tabs')!.querySelector('[data-tab=more]')!.classList.add('badge'); }).catch(() => {});

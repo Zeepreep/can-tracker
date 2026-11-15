@@ -1,5 +1,6 @@
 import type { Can } from './types';
 import { allCans, db, notifyChanged } from './db';
+import { t } from './i18n';
 
 export const FORMAT = 'can-tracker';
 export const VERSION = 1;
@@ -20,9 +21,9 @@ const STR = ['flavor', 'tagline', 'country', 'barcode', 'imageUrl', 'color', 'no
 /** Parse + validate import text. Never throws; returns errors for the UI. Unknown fields are dropped. */
 export function parseBackup(text: string): { cans: Can[]; skipped: number; error?: string } {
   let j: any;
-  try { j = JSON.parse(text); } catch { return { cans: [], skipped: 0, error: 'That file is not a valid backup (could not read it).' }; }
-  if (!j || j.app !== FORMAT || !Array.isArray(j.cans)) return { cans: [], skipped: 0, error: 'That file is not a Can Tracker backup.' };
-  if (typeof j.version !== 'number' || j.version > VERSION) return { cans: [], skipped: 0, error: 'This backup is from a newer version of the app. Update the app first.' };
+  try { j = JSON.parse(text); } catch { return { cans: [], skipped: 0, error: t('That file is not a valid backup (could not read it).') }; }
+  if (!j || j.app !== FORMAT || !Array.isArray(j.cans)) return { cans: [], skipped: 0, error: t('That file is not a Can Tracker backup.') };
+  if (typeof j.version !== 'number' || j.version > VERSION) return { cans: [], skipped: 0, error: t('This backup is from a newer version of the app. Update the app first.') };
   const cans: Can[] = []; let skipped = 0;
   for (const x of j.cans) {
     if (!validCan(x)) { skipped++; continue; }

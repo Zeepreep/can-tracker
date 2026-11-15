@@ -1,4 +1,5 @@
 import { cleanBarcode } from './off';
+import { t } from './i18n';
 
 type Reader = typeof import('zxing-wasm/reader');
 let readerP: Promise<Reader> | null = null;
@@ -54,13 +55,13 @@ export async function startLive(video: HTMLVideoElement, onCode: (c: string) => 
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
   } catch (e) {
     const name = (e as DOMException)?.name;
-    onError(name === 'NotAllowedError' ? 'Camera permission was denied. You can type the number or take a photo instead.' : 'Camera not available. You can type the number or take a photo instead.');
+    onError(name === 'NotAllowedError' ? t('Camera permission was denied. You can type the number or take a photo instead.') : t('Camera not available. You can type the number or take a photo instead.'));
     return { stop() {} };
   }
   video.srcObject = stream;
   video.setAttribute('playsinline', 'true');
   video.muted = true;
-  try { await video.play(); } catch { onError('Camera could not start. Use photo or type the number.'); }
+  try { await video.play(); } catch { onError(t('Camera could not start. Use photo or type the number.')); }
   const cv = document.createElement('canvas');
   const ctx = cv.getContext('2d', { willReadFrequently: true })!;
   let last = '', count = 0;
