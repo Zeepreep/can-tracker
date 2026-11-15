@@ -101,11 +101,19 @@ export const NL: Record<string, string> = {
   'Could not read the can on this phone. You can still add it by hand.': 'Het blikje kon op deze telefoon niet worden gelezen. Je kunt het nog met de hand toevoegen.',
   'Add a can by hand': 'Blikje met de hand toevoegen',
   // origin (language / country guess)
-  'English': 'Engels', 'Czech': 'Tsjechisch', 'Can Tracker': 'Can Tracker', 'Dutch': 'Nederlands', 'German': 'Duits', 'Polish': 'Pools', 'French': 'Frans', 'Spanish': 'Spaans', 'Italian': 'Italiaans',
-  'Netherlands': 'Nederland', 'Belgium': 'België', 'Austria': 'Oostenrijk', 'Switzerland': 'Zwitserland', 'Poland': 'Polen', 'France': 'Frankrijk', 'Spain': 'Spanje', 'Italy': 'Italië', 'Czechia': 'Tsjechië', 'Slovakia': 'Slowakije',
+  'English': 'Engels', 'Czech': 'Tsjechisch', 'Swedish': 'Zweeds', 'Portuguese': 'Portugees', 'Can Tracker': 'Can Tracker', 'Dutch': 'Nederlands', 'German': 'Duits', 'Polish': 'Pools', 'French': 'Frans', 'Spanish': 'Spaans', 'Italian': 'Italiaans',
+  'Netherlands': 'Nederland', 'Belgium': 'België', 'Austria': 'Oostenrijk', 'Switzerland': 'Zwitserland', 'Poland': 'Polen', 'France': 'Frankrijk', 'Spain': 'Spanje', 'Italy': 'Italië', 'Czechia': 'Tsjechië', 'Sweden': 'Zweden', 'Portugal': 'Portugal', 'Brazil': 'Brazilië', 'Canada': 'Canada', 'Slovakia': 'Slowakije',
   'Tagline known from "{name}": {country}': 'Tekst bekend van "{name}": {country}',
   'Language read: {lang}. Possible country: {countries}': 'Taal herkend: {lang}. Mogelijk land: {countries}',
   'Language read: {lang}. English says nothing about the country.': 'Taal herkend: {lang}. Engels zegt niets over het land.',
+  // tagline library
+  'Tagline library': 'Tagline-bibliotheek',
+  'Look up which language and country a text on a can belongs to, without scanning.': 'Zoek bij welke taal en welk land een tekst op een blikje hoort, zonder te scannen.',
+  'Open library': 'Bibliotheek openen', 'Close': 'Sluiten',
+  'Type what is printed on the can': 'Typ wat er op het blikje staat',
+  'Only wording I saw on the official Red Bull websites is listed. Cans from other countries may differ.': 'Alleen teksten die ik op de officiële Red Bull-websites heb gezien staan hier. Blikjes uit andere landen kunnen afwijken.',
+  'No match. The text may be new, or use a different spelling.': 'Geen match. De tekst is misschien nieuw of anders gespeld.',
+  'Wings slogan': 'Vleugels-slogan', 'Body and mind line': 'Tekst over lichaam en geest', 'Seen on: {sites}': 'Gezien op: {sites}',
   // more
   'Language': 'Taal', 'Backup': 'Back-up', '1 can': '1 blikje', '{n} cans': '{n} blikjes', '{count} stored on this phone.': '{count} opgeslagen op deze telefoon.',
   'Last backup: {date}': 'Laatste back-up: {date}', 'No backup made yet.': 'Nog geen back-up gemaakt.',

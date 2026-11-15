@@ -2,6 +2,7 @@ import { makeBackup, parseBackup, planMerge, applyMerge, markBackedUp, lastBacku
 import { allCans } from './db';
 import { renderDiagnostics, esc } from './diagnostics';
 import { getConfig, setConfig, syncNow, lastSync } from './sync';
+import { openLibrary } from './library-ui';
 import { t, getLang, setLang, fmtDate, fmtDateTime, cansLabel } from './i18n';
 import { APP_VERSION } from './version';
 import { checkForUpdates } from './sw-register';
@@ -20,6 +21,9 @@ export async function renderMore(root: HTMLElement) {
     </div>
     <h2>${t('Language')}</h2>
     <div class="seg"><button type="button" data-lang="en" class="${getLang() === 'en' ? 'on' : ''}">English</button><button type="button" data-lang="nl" class="${getLang() === 'nl' ? 'on' : ''}">Nederlands</button></div>
+    <h2>${t('Tagline library')}</h2>
+    <div class="card"><div class="dim" style="font-size:14px">${t('Look up which language and country a text on a can belongs to, without scanning.')}</div>
+      <button class="secondary" id="open-lib" style="width:100%;margin-top:10px">${t('Open library')}</button></div>
     <h2>${t('Backup')}</h2>
     <div class="card"><div>${t('{count} stored on this phone.', { count: cansLabel(n) })}</div>
       <div class="dim" style="font-size:14px">${lb ? t('Last backup: {date}', { date: fmtDate(lb) }) : t('No backup made yet.')}</div>
@@ -89,6 +93,7 @@ export async function renderMore(root: HTMLElement) {
     else sout.innerHTML = `<span class="fail">${esc(r.message)}</span>`;
   });
   root.querySelector('#s-off')?.addEventListener('click', async () => { await setConfig(null); renderMore(root); });
+  root.querySelector('#open-lib')!.addEventListener('click', openLibrary);
   root.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang as 'en' | 'nl')));
   renderDiagnostics(root.querySelector<HTMLElement>('#diag-root')!, true);
 }

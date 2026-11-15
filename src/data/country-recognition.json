@@ -1,9 +1,10 @@
 {
-  "schemaVersion": 1,
-  "description": "Recognizes known Red Bull packaging taglines as language clues. A language match is not proof of country of manufacture, distribution, or purchase.",
+  "schemaVersion": 2,
+  "description": "Known Red Bull packaging taglines as language clues. A language match is not proof of country of manufacture, distribution, or purchase. 'sources' lists where the wording was read: a redbull.com site locale (page text, not only search-result titles), or another note.",
   "entries": [
     {
-      "id": "en-revitalizes",
+      "id": "en-vitalizes",
+      "kind": "descriptor",
       "language": "English",
       "phrases": [
         "revitalizes body and mind",
@@ -11,32 +12,69 @@
         "vitalizes body and mind",
         "vitalises body and mind"
       ],
-      "possibleCountries": []
+      "possibleCountries": [],
+      "sources": [
+        "redbull.com/int-en (\"Vitalizes Body and Mind.\"; \"Revitalizes\" is an older wording)"
+      ],
+      "display": "Vitalizes Body and Mind"
     },
     {
       "id": "en-wings",
+      "kind": "wings",
       "language": "English",
       "phrases": [
         "red bull gives you wings",
-        "gives you wings"
+        "gives you wings",
+        "gives you wiiings",
+        "red bull gives you wiiings"
       ],
-      "possibleCountries": []
+      "possibleCountries": [],
+      "sources": [
+        "redbull.com/int-en"
+      ],
+      "display": "Red Bull gives you wiiings"
     },
     {
       "id": "de-wings",
+      "kind": "wings",
       "language": "German",
       "phrases": [
         "verleiht flügel",
-        "verleiht fluegel"
+        "verleiht fluegel",
+        "verleiht flüüügel",
+        "verleiht fluuugel"
       ],
       "possibleCountries": [
         "Germany",
         "Austria",
         "Switzerland"
-      ]
+      ],
+      "sources": [
+        "redbull.com/at-de (\"Red Bull verleiht Flüüügel\")"
+      ],
+      "display": "Red Bull verleiht Flüüügel"
+    },
+    {
+      "id": "de-vitalizes",
+      "kind": "descriptor",
+      "language": "German",
+      "phrases": [
+        "belebt geist und körper",
+        "belebt geist und koerper"
+      ],
+      "possibleCountries": [
+        "Germany",
+        "Austria",
+        "Switzerland"
+      ],
+      "sources": [
+        "redbull.com/at-de (\"Belebt Geist und Körper.\")"
+      ],
+      "display": "Belebt Geist und Körper"
     },
     {
       "id": "nl-wings",
+      "kind": "wings",
       "language": "Dutch",
       "phrases": [
         "geeft je vleugels"
@@ -44,10 +82,136 @@
       "possibleCountries": [
         "Netherlands",
         "Belgium"
-      ]
+      ],
+      "sources": [
+        "redbull.com/nl-nl (\"Red Bull GEEFT JE VLEUGELS\")"
+      ],
+      "display": "Red Bull geeft je vleugels"
+    },
+    {
+      "id": "pl-wings",
+      "kind": "wings",
+      "language": "Polish",
+      "phrases": [
+        "doda ci skrzydeł",
+        "doda ci skrzydel",
+        "doda ci skrzyyydeł",
+        "doda ci skrzyyydel"
+      ],
+      "possibleCountries": [
+        "Poland"
+      ],
+      "sources": [
+        "redbull.com/pl-pl (\"Red Bull DODA CI SKRZYYYDEŁ\")"
+      ],
+      "display": "Red Bull doda ci skrzyyydeł"
+    },
+    {
+      "id": "it-wings",
+      "kind": "wings",
+      "language": "Italian",
+      "phrases": [
+        "ti mette le ali",
+        "ti mette le aaali"
+      ],
+      "possibleCountries": [
+        "Italy"
+      ],
+      "sources": [
+        "redbull.com/it-it (\"Red Bull TI METTE LE AAALI\")"
+      ],
+      "display": "Red Bull ti mette le aaali"
+    },
+    {
+      "id": "sv-wings",
+      "kind": "wings",
+      "language": "Swedish",
+      "phrases": [
+        "ger dig vingar",
+        "ger dig viiingar"
+      ],
+      "possibleCountries": [
+        "Sweden"
+      ],
+      "sources": [
+        "redbull.com/se-sv (\"Red Bull GER DIG VIIINGAR\")"
+      ],
+      "display": "Red Bull ger dig viiingar"
+    },
+    {
+      "id": "pt-wings",
+      "kind": "wings",
+      "language": "Portuguese",
+      "phrases": [
+        "dá-te asas",
+        "dá-te aaasas",
+        "da te asas",
+        "da te aaasas"
+      ],
+      "possibleCountries": [
+        "Portugal"
+      ],
+      "sources": [
+        "redbull.com/pt-pt (\"Red Bull dá-te aaasas\")"
+      ],
+      "display": "Red Bull dá-te aaasas"
+    },
+    {
+      "id": "fr-wings",
+      "kind": "wings",
+      "language": "French",
+      "phrases": [
+        "donne des ailes",
+        "donne des aiiiles",
+        "donne des aiiles"
+      ],
+      "possibleCountries": [
+        "France",
+        "Switzerland",
+        "Canada"
+      ],
+      "sources": [
+        "redbull.com/fr-fr (\"Red Bull DONNE DES AIIILES\")",
+        "redbull.com/ch-fr",
+        "redbull.com/ca-fr"
+      ],
+      "display": "Red Bull donne des aiiiles"
+    },
+    {
+      "id": "fr-vitalizes",
+      "kind": "descriptor",
+      "language": "French",
+      "phrases": [
+        "stimule le corps et l'esprit",
+        "stimule le corps et lesprit"
+      ],
+      "possibleCountries": [
+        "Canada"
+      ],
+      "sources": [
+        "redbull.com/ca-fr (\"Stimule le corps et l'esprit.\"; other French-speaking markets not checked)"
+      ],
+      "display": "Stimule le corps et l'esprit"
+    },
+    {
+      "id": "es-wings",
+      "kind": "wings",
+      "language": "Spanish",
+      "phrases": [
+        "te da alas",
+        "te da aaalas"
+      ],
+      "possibleCountries": [
+        "Spain"
+      ],
+      "sources": [
+        "redbull.com/es-es (\"Red Bull TE DA AAALAS\"; Latin American wording not checked)"
+      ],
+      "display": "Red Bull te da aaalas"
     },
     {
       "id": "cs-revitalizes",
+      "kind": "descriptor",
       "language": "Czech",
       "phrases": [
         "revitalizuje tělo a mysl",
@@ -56,7 +220,11 @@
       "possibleCountries": [
         "Czechia",
         "Slovakia"
-      ]
+      ],
+      "sources": [
+        "reference photo of a Czech Green Edition can"
+      ],
+      "display": "Revitalizuje tělo a mysl"
     }
   ]
 }

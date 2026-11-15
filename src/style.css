@@ -44,3 +44,4 @@ nav#tabs button.badge::after { content:' •'; color: var(--warn); }
 .version-line { display:flex; justify-content:space-between; align-items:center; gap:12px; }
 .update-status { font-size:13px; margin-top:8px; }
 #check-updates:disabled { opacity:.6; }
+.quote { font-size:17px; font-weight:600; }

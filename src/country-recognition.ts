@@ -2,7 +2,7 @@ import { norm } from './glossary';
 import type { OcrWord } from './ocr';
 import reference from './data/country-recognition.json';
 
-interface ReferenceEntry { id: string; language: string; phrases: string[]; possibleCountries: string[]; }
+export interface ReferenceEntry { id: string; display?: string; kind?: 'wings' | 'descriptor'; language: string; phrases: string[]; possibleCountries: string[]; sources?: string[]; }
 interface ReferenceData { schemaVersion: number; entries: ReferenceEntry[]; }
 export interface TaglineRecognition { language: string; matchedPhrases: string[]; possibleCountries: string[]; }
 const data = reference as ReferenceData;
@@ -28,3 +28,6 @@ export function recognizeTagline(words: OcrWord[], minConfidence = 45): TaglineR
     possibleCountries: [...new Set(matches.flatMap(({ entry }) => entry.possibleCountries))],
   };
 }
+
+/** All known taglines, for the library screen. */
+export const libraryEntries = (): ReferenceEntry[] => data.entries;

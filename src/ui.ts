@@ -202,7 +202,7 @@ export function renderScan(root: HTMLElement) {
       const learned = countryFromTaglines(scan.words, pool);
       const tagline = learned ? null : recognizeTagline(scan.words);
       const lg = learned || tagline ? null : detectLanguage(scan.words);
-      const langName: Record<LangCode, string> = { en: t('English'), nl: t('Dutch'), de: t('German'), pl: t('Polish'), fr: t('French'), es: t('Spanish'), it: t('Italian') };
+      const langName: Record<LangCode, string> = { en: t('English'), nl: t('Dutch'), de: t('German'), pl: t('Polish'), fr: t('French'), es: t('Spanish'), it: t('Italian'), sv: t('Swedish'), pt: t('Portuguese'), cs: t('Czech') };
       const guessedCountry = learned?.country ?? (tagline ? (tagline.possibleCountries[0] ? t(tagline.possibleCountries[0]) : undefined) : lg && COUNTRIES[lg.lang].length ? t(COUNTRIES[lg.lang][0]) : undefined);
       const hintLines: string[] = learned
         ? [t('Tagline known from "{name}": {country}', { name: learned.from, country: learned.country })]

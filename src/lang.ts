@@ -3,21 +3,24 @@
 import { norm } from './glossary';
 import type { OcrWord } from './ocr';
 
-export type LangCode = 'en' | 'nl' | 'de' | 'pl' | 'fr' | 'es' | 'it';
+export type LangCode = 'en' | 'nl' | 'de' | 'pl' | 'fr' | 'es' | 'it' | 'sv' | 'pt' | 'cs';
 
 // strong = the tagline ("gives you wings"/"vitalizes body and mind") or words only this language uses (3 points); common = function words (1 point).
 // Words on every can regardless of country (red, bull, energy, drink, taurine) are deliberately absent. Lists are accent-free (see norm()).
 const L: Record<LangCode, { strong: string[]; common: string[] }> = {
   en: { strong: ['wings', 'vitalizes', 'revitalizes', 'vitalises', 'revitalises'], common: ['the', 'and', 'your', 'with', 'body', 'mind', 'gives', 'for', 'from', 'this', 'caffeine', 'serving', 'contains'] },
   nl: { strong: ['vleugels', 'geeft'], common: ['het', 'een', 'van', 'voor', 'met', 'je', 'jouw', 'lichaam', 'geest', 'bevat', 'cafeine', 'drank', 'niet', 'ook', 'deze'] },
-  de: { strong: ['verleiht', 'flugel', 'fluegel', 'getrank', 'getraenk', 'enthalt', 'enthaelt', 'koffein'], common: ['der', 'die', 'das', 'und', 'mit', 'fur', 'fuer', 'korper', 'geist', 'ist', 'nicht', 'ein', 'eine', 'auf', 'ihre', 'deine'] },
-  pl: { strong: ['dodaje', 'skrzydel', 'skrzyde', 'skrzydla', 'napoj', 'zawiera', 'kofeina', 'tauryna', 'energetyczny'], common: ['dla', 'nie', 'jest', 'oraz', 'ciala', 'ducha', 'jak', 'przez', 'swoje'] },
-  fr: { strong: ['ailes', 'donne', 'boisson', 'energisante', 'contient', 'caffeine'], common: ['les', 'des', 'une', 'avec', 'pour', 'votre', 'corps', 'esprit', 'est', 'dans'] },
-  es: { strong: ['alas', 'bebida', 'energetica', 'contiene', 'cafeina'], common: ['los', 'las', 'una', 'con', 'para', 'cuerpo', 'mente', 'te', 'da', 'tu', 'es'] },
-  it: { strong: ['ali', 'mette', 'bevanda', 'contiene', 'caffeina'], common: ['gli', 'una', 'con', 'per', 'corpo', 'mente', 'ti', 'il', 'della', 'tuo'] },
+  de: { strong: ['verleiht', 'belebt', 'flugel', 'fluegel', 'fluuugel', 'getrank', 'getraenk', 'enthalt', 'enthaelt', 'koffein'], common: ['der', 'die', 'das', 'und', 'mit', 'fur', 'fuer', 'korper', 'geist', 'ist', 'nicht', 'ein', 'eine', 'auf', 'ihre', 'deine'] },
+  pl: { strong: ['dodaje', 'doda', 'skrzyyydel', 'skrzydel', 'skrzyde', 'skrzydla', 'napoj', 'zawiera', 'kofeina', 'tauryna', 'energetyczny'], common: ['dla', 'nie', 'jest', 'oraz', 'ciala', 'ducha', 'jak', 'przez', 'swoje'] },
+  fr: { strong: ['ailes', 'aiiiles', 'aiiles', 'stimule', 'donne', 'boisson', 'energisante', 'contient', 'caffeine'], common: ['les', 'des', 'une', 'avec', 'pour', 'votre', 'corps', 'esprit', 'est', 'dans'] },
+  es: { strong: ['alas', 'aaalas', 'bebida', 'energetica', 'contiene', 'cafeina'], common: ['los', 'las', 'una', 'con', 'para', 'cuerpo', 'mente', 'te', 'da', 'tu', 'es'] },
+  it: { strong: ['ali', 'aaali', 'mette', 'bevanda', 'contiene', 'caffeina'], common: ['gli', 'una', 'con', 'per', 'corpo', 'mente', 'ti', 'il', 'della', 'tuo'] },
+  sv: { strong: ['vingar', 'viiingar'], common: ['och', 'att', 'som', 'den', 'det', 'dig', 'kropp', 'sinne'] },
+  pt: { strong: ['asas', 'aaasas'], common: ['dos', 'das', 'uma', 'com', 'para', 'corpo', 'mente', 'te'] },
+  cs: { strong: ['kridla', 'kriiidla', 'revitalizuje', 'telo', 'mysl', 'plechovce'], common: ['pro', 'bez', 'cukru'] },
 };
 // accented letters hint at a language even when the reader mangles the word around them (weak: 1 point each, max 2)
-const HINTS: [RegExp, LangCode][] = [[/[łąężźśćń]/i, 'pl'], [/[äöüß]/i, 'de'], [/[éèêçàù]/i, 'fr'], [/[ñ¿¡]/i, 'es']];
+const HINTS: [RegExp, LangCode][] = [[/[łąężźśćń]/i, 'pl'], [/[äöüß]/i, 'de'], [/[éèêçàù]/i, 'fr'], [/[ñ¿¡]/i, 'es'], [/[řěůťďň]/i, 'cs'], [/[åø]/i, 'sv']];
 
 export interface LangGuess { lang: LangCode; score: number; evidence: string[]; }
 
@@ -44,4 +47,5 @@ export function detectLanguage(words: OcrWord[], minConf = 40): LangGuess | null
 export const COUNTRIES: Record<LangCode, string[]> = {
   en: [], nl: ['Netherlands', 'Belgium'], de: ['Germany', 'Austria', 'Switzerland'],
   pl: ['Poland'], fr: ['France', 'Belgium', 'Switzerland'], es: ['Spain'], it: ['Italy'],
+  sv: ['Sweden'], pt: ['Portugal', 'Brazil'], cs: ['Czechia', 'Slovakia'],
 };
