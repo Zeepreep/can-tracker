@@ -13,7 +13,7 @@
   <title>Can Tracker</title>
 </head>
 <body>
-  <div id="update-bar" hidden><span>Update ready</span><button id="update-btn">Reload</button></div>
+  <div id="update-bar" role="status" aria-live="polite" aria-atomic="true" hidden><span id="update-message">Update available</span><button id="update-btn" type="button">Reload</button></div>
   <main id="view"></main>
   <nav id="tabs">
     <button data-tab="scan">Scan</button>
