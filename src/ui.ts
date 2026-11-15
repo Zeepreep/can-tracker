@@ -5,6 +5,7 @@ import { lookup, cleanBarcode } from './off';
 import { decodePhoto, startLive, type LiveScan } from './scanner';
 import { scanFront } from './ocr';
 import { queryTokens, rankCans, guessName } from './identify';
+import { recognizeTagline } from './country-recognition';
 import { t } from './i18n';
 
 export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
@@ -194,11 +195,13 @@ export function renderScan(root: HTMLElement) {
       const pool = (await allCans()).filter((c) => !c.deleted);
       const cands = rankCans(queryTokens(scan.words), pool);
       const readText = scan.words.filter((w) => w.confidence >= 45).map((w) => w.text).join(' ');
+      const tagline = recognizeTagline(scan.words);
+      const countryHint = tagline ? '<div class="dim" style="font-size:13px;margin-top:6px">' + esc(t('Tagline language: {language}', { language: tagline.language })) + (tagline.possibleCountries.length ? '<br>' + esc(t('Possible markets: {countries}', { countries: tagline.possibleCountries.join(', ') })) : '<br>' + esc(t('This tagline does not identify a country.'))) + '</div>' : '';
       const read = `<div class="dim" style="font-size:13px;margin-top:6px;word-break:break-word">${readText ? esc(t('I read: ')) + esc(readText) : t('I could not read any text. Try again with the label facing the camera and good light.')}</div>`;
       const swatch = scan.colour ? `<span class="swatch" style="background:${scan.colour}"></span>` : '';
       const addNew = () => openForm({ status: 'have', name: guessName(scan.words), color: scan.colour ?? undefined, barcode: pendingBarcode }, () => renderScan(root));
       const head = cands.length ? (cands[0].strong ? t('Looks like this one:') : t('Could it be one of these?')) : t('Not in your list yet.');
-      result.innerHTML = `<div class="card"><b>${head}</b>${swatch}${cands.map((c, i) => `<div class="can" data-i="${i}">${thumb(c.can)}<div class="meta"><div class="nm">${esc(c.can.name)}</div><div class="dim sub">${c.can.status === 'have' ? t('In your collection') : t('On your wants list')}</div></div><button class="found" data-pick="${i}">${t('Yes')}</button></div>`).join('')}${read}<button class="${cands.length ? 'secondary' : 'primary'}" id="none" style="width:100%;margin-top:8px">${cands.length ? t('None of these: add as a new can') : t('Add as a new can')}</button></div>`;
+      result.innerHTML = `<div class="card"><b>${head}</b>${swatch}${cands.map((c, i) => `<div class="can" data-i="${i}">${thumb(c.can)}<div class="meta"><div class="nm">${esc(c.can.name)}</div><div class="dim sub">${c.can.status === 'have' ? t('In your collection') : t('On your wants list')}</div></div><button class="found" data-pick="${i}">${t('Yes')}</button></div>`).join('')}${countryHint}${read}<button class="${cands.length ? 'secondary' : 'primary'}" id="none" style="width:100%;margin-top:8px">${cands.length ? t('None of these: add as a new can') : t('Add as a new can')}</button></div>`;
       result.querySelector('#none')!.addEventListener('click', addNew);
       result.querySelectorAll<HTMLElement>('[data-pick]').forEach((b) => b.addEventListener('click', async () => {
         const c = cands[Number(b.dataset.pick)].can;
