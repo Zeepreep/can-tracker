@@ -1,5 +1,5 @@
 import type { Can } from './types';
-import { norm, expand, synonyms } from './glossary';
+import { GLOSSARY, norm, expand, synonyms } from './glossary';
 import type { OcrWord } from './ocr';
 
 /** Words printed on (nearly) every can: they say nothing about which one it is. */
@@ -9,14 +9,51 @@ const NOISE = new Set(['red', 'bull', 'energy', 'drink', 'wings', 'vleugels', 'f
 
 export const tokens = (s: string) => norm(s).split(' ').filter((t) => t.length >= 3 && !/^\d+$/.test(t));
 
-/** Distinctive query tokens from OCR output (confident, letters only, not noise). */
-export function queryTokens(words: OcrWord[], minConf = 45): string[] {
+/** Distinctive query tokens from OCR. When a collection is supplied, OCR is corrected
+ * against words that actually occur on those cans; unrelated OCR fragments are discarded. */
+export function queryTokens(words: OcrWord[], minConf = 45, catalogue?: Can[]): string[] {
+  const cans = catalogue ?? [];
+  const useLexicon = catalogue !== undefined;
+  // The bundled flavour/colour glossary supplies known label vocabulary even for cans
+  // that are not yet in the user's collection. Collection terms take priority.
+  const canonical = new Map<string, string>();
+  for (const row of GLOSSARY) {
+    const singleWords = row.map((term) => tokens(term)).filter((parts) => parts.length === 1).map((parts) => parts[0]);
+    const root = singleWords[0];
+    for (const token of singleWords) if (!NOISE.has(token) && !canonical.has(token)) canonical.set(token, root);
+  }
+  const vocabulary = new Map<string, string>();
+  for (const can of cans) {
+    const source = [can.name, can.flavor, can.tagline].filter(Boolean).join(' ');
+    for (const token of tokens(expand(source))) {
+      if (/^[a-z]+$/.test(token) && !NOISE.has(token)) vocabulary.set(token, canonical.get(token) ?? token);
+    }
+  }
+  for (const [token, root] of canonical) if (!vocabulary.has(token)) vocabulary.set(token, root);
+  const known = [...vocabulary.keys()];
   const out: string[] = [];
-  for (const w of words) {
-    if (w.confidence < minConf) continue;
-    for (const t of tokens(w.text)) {
-      if (!/^[a-z]+$/.test(t) || NOISE.has(t) || out.includes(t)) continue;
-      out.push(t);
+  for (const word of words) {
+    if (word.confidence < minConf) continue;
+    for (const raw of tokens(word.text)) {
+      if (!(useLexicon ? /^[a-z0-9]+$/ : /^[a-z]+$/).test(raw) || NOISE.has(raw)) continue;
+      let corrected = raw;
+      if (useLexicon) {
+        let best = 0;
+        let bestRoots = new Set<string>();
+        for (const candidate of known) {
+          const score = tokenSim(raw, candidate);
+          if (score > best) {
+            best = score;
+            bestRoots = new Set([vocabulary.get(candidate) ?? candidate]);
+          } else if (score === best && score > 0) {
+            bestRoots.add(vocabulary.get(candidate) ?? candidate);
+          }
+        }
+        // Ambiguous near-matches are discarded rather than guessed.
+        if (best < 0.75 || bestRoots.size !== 1) continue;
+        corrected = [...bestRoots][0];
+      }
+      if (!out.includes(corrected)) out.push(corrected);
     }
   }
   return out;
@@ -76,8 +113,8 @@ export function rankCans(qTokens: string[], cans: Can[]): Candidate[] {
 }
 
 /** Starting point for the "new can" form: only words that were read confidently. */
-export function guessName(words: OcrWord[]): string {
-  const keep = words.filter((w) => w.confidence >= 60).flatMap((w) => tokens(w.text)).filter((t) => /^[a-z]+$/.test(t) && !NOISE.has(t));
+export function guessName(words: OcrWord[], catalogue?: Can[]): string {
+  const keep = catalogue !== undefined ? queryTokens(words, 25, catalogue) : words.filter((w) => w.confidence >= 60).flatMap((w) => tokens(w.text)).filter((t) => /^[a-z]+$/.test(t) && !NOISE.has(t));
   const uniq = [...new Set(keep)].slice(0, 5);
   const title = uniq.map((t) => t[0].toUpperCase() + t.slice(1)).join(' ');
   return title ? `Red Bull ${title}` : 'Red Bull';
