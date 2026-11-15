@@ -9,14 +9,33 @@ const NOISE = new Set(['red', 'bull', 'energy', 'drink', 'wings', 'vleugels', 'f
 
 export const tokens = (s: string) => norm(s).split(' ').filter((t) => t.length >= 3 && !/^\d+$/.test(t));
 
-/** Distinctive query tokens from OCR output (confident, letters only, not noise). */
-export function queryTokens(words: OcrWord[], minConf = 45): string[] {
+/** Distinctive query tokens from OCR. When a collection is supplied, OCR is corrected
+ * against words that actually occur on those cans; unrelated OCR fragments are discarded. */
+export function queryTokens(words: OcrWord[], minConf = 45, catalogue: Can[] = []): string[] {
+  const vocabulary = new Set<string>();
+  for (const can of catalogue) {
+    const source = [can.name, can.flavor, can.tagline].filter(Boolean).join(' ');
+    for (const token of tokens(expand(source))) {
+      if (/^[a-z]+$/.test(token) && !NOISE.has(token)) vocabulary.add(token);
+    }
+  }
+  const known = [...vocabulary];
   const out: string[] = [];
-  for (const w of words) {
-    if (w.confidence < minConf) continue;
-    for (const t of tokens(w.text)) {
-      if (!/^[a-z]+$/.test(t) || NOISE.has(t) || out.includes(t)) continue;
-      out.push(t);
+  for (const word of words) {
+    if (word.confidence < minConf) continue;
+    for (const raw of tokens(word.text)) {
+      if (!/^[a-z]+$/.test(raw) || NOISE.has(raw)) continue;
+      let corrected = raw;
+      if (catalogue.length) {
+        let best = 0;
+        for (const candidate of known) {
+          const score = tokenSim(raw, candidate);
+          if (score > best) { best = score; corrected = candidate; }
+        }
+        // Only accept exact or one/two-character OCR corrections; never guess from a weak fragment.
+        if (best < 0.75) continue;
+      }
+      if (!out.includes(corrected)) out.push(corrected);
     }
   }
   return out;
@@ -76,8 +95,8 @@ export function rankCans(qTokens: string[], cans: Can[]): Candidate[] {
 }
 
 /** Starting point for the "new can" form: only words that were read confidently. */
-export function guessName(words: OcrWord[]): string {
-  const keep = words.filter((w) => w.confidence >= 60).flatMap((w) => tokens(w.text)).filter((t) => /^[a-z]+$/.test(t) && !NOISE.has(t));
+export function guessName(words: OcrWord[], catalogue: Can[] = []): string {
+  const keep = catalogue.length ? queryTokens(words, 25, catalogue) : words.filter((w) => w.confidence >= 60).flatMap((w) => tokens(w.text)).filter((t) => /^[a-z]+$/.test(t) && !NOISE.has(t));
   const uniq = [...new Set(keep)].slice(0, 5);
   const title = uniq.map((t) => t[0].toUpperCase() + t.slice(1)).join(' ');
   return title ? `Red Bull ${title}` : 'Red Bull';
