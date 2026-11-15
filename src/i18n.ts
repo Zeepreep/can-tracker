@@ -40,6 +40,13 @@ export const NL: Record<string, string> = {
   // tabs / shell
   'Scan': 'Scannen', 'Collection': 'Collectie', 'Wants': 'Zoeklijst', 'More': 'Meer',
   'Update ready': 'Update beschikbaar', 'Reload': 'Herladen',
+  'App update': 'App-update', 'Version {version}': 'Versie {version}', 'Check for updates': 'Controleren op updates',
+  'Check whether a newer version is available.': 'Controleer of er een nieuwere versie beschikbaar is.',
+  'Checking for updates…': 'Controleren op updates…', 'Update ready. Tap Reload at the top of the screen.': 'Update klaar. Tik bovenaan op Herladen.',
+  'A new version was found and is downloading. The update button will appear when it is ready.': 'Een nieuwe versie is gevonden en wordt gedownload. De updateknop verschijnt zodra deze klaar is.',
+  'You are using the latest version.': 'Je gebruikt de nieuwste versie.',
+  'Automatic updates are not supported by this browser.': 'Automatische updates worden niet ondersteund door deze browser.',
+  'Could not check for updates. Check your internet connection and try again.': 'Controleren op updates is niet gelukt. Controleer je internetverbinding en probeer het opnieuw.',
   // form
   'Edit can': 'Blikje bewerken', 'Add can': 'Blikje toevoegen', 'Name': 'Naam', 'Flavor': 'Smaak',
   'Tagline on can': 'Tekst op het blikje', 'Country / language': 'Land / taal', 'Barcode': 'Barcode', 'Notes': 'Notities',
