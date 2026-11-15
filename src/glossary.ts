@@ -20,7 +20,7 @@ export const GLOSSARY: string[][] = [
   ['autumn', 'fall', 'herfst', 'herbst'], ['edition', 'editie', 'ausgabe'], ['limited', 'beperkt', 'limitiert', 'begrenzt'],
   // elderflower / curuba (Polish cans: "kwiat czarnego bzu"; NB bare "bez" means "without" in Polish, so it is not listed)
   ['elderflower', 'elder flower', 'vlierbloesem', 'vlier', 'holunderbluete', 'holunderblute', 'holunder', 'kwiat bzu', 'kwiat czarnego bzu', 'czarnego bzu', 'bzu', 'czarny bez'],
-  ['curuba', 'banana passionfruit', 'banaanpassievrucht', 'curuba passionfruit'],
+  ['curuba', 'caruba', 'banana passionfruit', 'banaanpassievrucht', 'curuba passionfruit'],
   // Polish basics (review needed)
   ['red', 'czerwony', 'czerwona'], ['blue', 'niebieski', 'niebieska'], ['yellow', 'zolty', 'zolta'], ['green', 'zielony', 'zielona'],
   ['purple', 'fioletowy', 'fioletowa'], ['pink', 'rozowy', 'rozowa'], ['orange', 'pomaranczowy', 'pomarancza'], ['white', 'bialy', 'biala'],
