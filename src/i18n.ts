@@ -82,6 +82,8 @@ export const NL: Record<string, string> = {
   'Reading the can… the first time takes a little longer.': 'Blikje lezen… de eerste keer duurt iets langer.',
   'Loading the text reader (first time only)…': 'Tekstlezer laden (alleen de eerste keer)…', 'Reading the text…': 'Tekst lezen…',
   'I read: ': 'Gelezen: ',
+  'Recognized product text: ': 'Herkende producttekst: ',
+  'No reliable product words matched your collection. Try a closer, straighter photo of the can.': 'Geen betrouwbare productwoorden uit je collectie herkend. Probeer een foto dichterbij en rechter van het blikje.',
   'Tagline language: {language}': 'Taglinetaal: {language}',
   'Possible markets: {countries}': 'Mogelijke markten: {countries}',
   'This tagline does not identify a country.': 'Deze tekst identificeert geen specifiek land.',
