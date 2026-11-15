@@ -14,6 +14,14 @@ const cans = [
 const w = (...t: string[]) => t.map((text) => ({ text, confidence: 88 }));
 
 describe('queryTokens', () => {
+  it('corrects OCR against the actual can catalogue and drops unrelated fragments', () => {
+    const greenCan = mk('green', 'Redbull Green Edition', { flavor: 'Caruba Elderflower' });
+    const raw = [...w('GREEN', 'EDITION', 'CURUB4', 'ELDERFL0WER', 'LAY', 'ENERGY', 'DRIN', 'IR')];
+    const corrected = queryTokens(raw, 25, [greenCan]);
+    expect(corrected).toEqual(['green', 'edition', 'curuba', 'elderflower']);
+    expect(rankCans(corrected, [greenCan])[0].can.id).toBe('green');
+    expect(guessName(raw, [greenCan])).toBe('Red Bull Green Edition Curuba Elderflower');
+  });
   it('drops noise, digits, low confidence', () => {
     const t = queryTokens([...w('RED', 'BULL', 'ENERGY', 'DRINK', '250ml', 'CURUBA'), { text: 'xqzv', confidence: 20 }]);
     expect(t).toEqual(['curuba']);
