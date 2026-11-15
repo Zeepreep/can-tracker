@@ -45,6 +45,18 @@
         "Netherlands",
         "Belgium"
       ]
+    },
+    {
+      "id": "cs-revitalizes",
+      "language": "Czech",
+      "phrases": [
+        "revitalizuje tělo a mysl",
+        "revitalizuje telo a mysl"
+      ],
+      "possibleCountries": [
+        "Czechia",
+        "Slovakia"
+      ]
     }
   ]
 }
