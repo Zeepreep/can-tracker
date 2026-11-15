@@ -100,6 +100,12 @@ export const NL: Record<string, string> = {
   'None of these: add as a new can': 'Geen van deze: toevoegen als nieuw blikje', 'Add as a new can': 'Toevoegen als nieuw blikje',
   'Could not read the can on this phone. You can still add it by hand.': 'Het blikje kon op deze telefoon niet worden gelezen. Je kunt het nog met de hand toevoegen.',
   'Add a can by hand': 'Blikje met de hand toevoegen',
+  // origin (language / country guess)
+  'English': 'Engels', 'Czech': 'Tsjechisch', 'Can Tracker': 'Can Tracker', 'Dutch': 'Nederlands', 'German': 'Duits', 'Polish': 'Pools', 'French': 'Frans', 'Spanish': 'Spaans', 'Italian': 'Italiaans',
+  'Netherlands': 'Nederland', 'Belgium': 'België', 'Austria': 'Oostenrijk', 'Switzerland': 'Zwitserland', 'Poland': 'Polen', 'France': 'Frankrijk', 'Spain': 'Spanje', 'Italy': 'Italië', 'Czechia': 'Tsjechië', 'Slovakia': 'Slowakije',
+  'Tagline known from "{name}": {country}': 'Tekst bekend van "{name}": {country}',
+  'Language read: {lang}. Possible country: {countries}': 'Taal herkend: {lang}. Mogelijk land: {countries}',
+  'Language read: {lang}. English says nothing about the country.': 'Taal herkend: {lang}. Engels zegt niets over het land.',
   // more
   'Language': 'Taal', 'Backup': 'Back-up', '1 can': '1 blikje', '{n} cans': '{n} blikjes', '{count} stored on this phone.': '{count} opgeslagen op deze telefoon.',
   'Last backup: {date}': 'Laatste back-up: {date}', 'No backup made yet.': 'Nog geen back-up gemaakt.',

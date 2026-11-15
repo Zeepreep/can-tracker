@@ -119,3 +119,22 @@ export function guessName(words: OcrWord[], catalogue?: Can[]): string {
   const title = uniq.map((t) => t[0].toUpperCase() + t.slice(1)).join(' ');
   return title ? `Red Bull ${title}` : 'Red Bull';
 }
+
+/**
+ * Learned from his own collection: if the words read from the photo contain (most of) the tagline of a can he already
+ * saved with a country, suggest that country. Covers taglines no bundled list could know.
+ */
+export function countryFromTaglines(words: OcrWord[], cans: Can[], minConf = 45): { country: string; from: string } | null {
+  const seen = new Set(words.filter((w) => w.confidence >= minConf).flatMap((w) => tokens(w.text)));
+  if (!seen.size) return null;
+  let best: { country: string; from: string; share: number } | null = null;
+  for (const c of cans) {
+    if (!c.tagline || !c.country) continue;
+    const tt = [...new Set(tokens(c.tagline))];
+    if (tt.length < 2) continue;
+    const hit = tt.filter((t) => [...seen].some((q) => tokenSim(q, t) >= 0.75)).length;
+    const share = hit / tt.length;
+    if (hit >= 2 && share >= 0.7 && (!best || share > best.share)) best = { country: c.country, from: c.name, share };
+  }
+  return best ? { country: best.country, from: best.from } : null;
+}

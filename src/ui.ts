@@ -4,8 +4,9 @@ import { buildIndex, search } from './search';
 import { lookup, cleanBarcode } from './off';
 import { decodePhoto, startLive, type LiveScan } from './scanner';
 import { scanFront } from './ocr';
-import { queryTokens, rankCans, guessName } from './identify';
+import { queryTokens, rankCans, guessName, countryFromTaglines } from './identify';
 import { recognizeTagline } from './country-recognition';
+import { detectLanguage, COUNTRIES, type LangCode } from './lang';
 import { t } from './i18n';
 
 export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
@@ -196,11 +197,23 @@ export function renderScan(root: HTMLElement) {
       const correctedTokens = queryTokens(scan.words, 25, pool);
       const cands = rankCans(correctedTokens, pool);
       const readText = correctedTokens.map((word) => word[0].toUpperCase() + word.slice(1)).join(' ');
-      const tagline = recognizeTagline(scan.words);
-      const countryHint = tagline ? '<div class="dim" style="font-size:13px;margin-top:6px">' + esc(t('Tagline language: {language}', { language: tagline.language })) + (tagline.possibleCountries.length ? '<br>' + esc(t('Possible markets: {countries}', { countries: tagline.possibleCountries.join(', ') })) : '<br>' + esc(t('This tagline does not identify a country.'))) + '</div>' : '';
       const read = `<div class="dim" style="font-size:13px;margin-top:6px;word-break:break-word">${readText ? esc(t('Recognized product text: ')) + esc(readText) : t('No reliable product words matched your collection. Try a closer, straighter photo of the can.')}</div>`;
+      // Where is this can from? In order of trust: (1) a tagline he already saved with a country, (2) a complete known tagline, (3) a word-based language guess.
+      const learned = countryFromTaglines(scan.words, pool);
+      const tagline = learned ? null : recognizeTagline(scan.words);
+      const lg = learned || tagline ? null : detectLanguage(scan.words);
+      const langName: Record<LangCode, string> = { en: t('English'), nl: t('Dutch'), de: t('German'), pl: t('Polish'), fr: t('French'), es: t('Spanish'), it: t('Italian') };
+      const guessedCountry = learned?.country ?? (tagline ? (tagline.possibleCountries[0] ? t(tagline.possibleCountries[0]) : undefined) : lg && COUNTRIES[lg.lang].length ? t(COUNTRIES[lg.lang][0]) : undefined);
+      const hintLines: string[] = learned
+        ? [t('Tagline known from "{name}": {country}', { name: learned.from, country: learned.country })]
+        : tagline
+          ? [t('Tagline language: {language}', { language: t(tagline.language) }), tagline.possibleCountries.length ? t('Possible markets: {countries}', { countries: tagline.possibleCountries.map((c) => t(c)).join(', ') }) : t('This tagline does not identify a country.')]
+          : lg
+            ? [COUNTRIES[lg.lang].length ? t('Language read: {lang}. Possible country: {countries}', { lang: langName[lg.lang], countries: COUNTRIES[lg.lang].map((c) => t(c)).join(' / ') }) : t('Language read: {lang}. English says nothing about the country.', { lang: langName[lg.lang] })]
+            : [];
+      const countryHint = hintLines.length ? `<div class="dim" style="font-size:13px;margin-top:6px">🌍 ${hintLines.map(esc).join('<br>')}</div>` : '';
       const swatch = scan.colour ? `<span class="swatch" style="background:${scan.colour}"></span>` : '';
-      const addNew = () => openForm({ status: 'have', name: guessName(scan.words, pool), color: scan.colour ?? undefined, barcode: pendingBarcode }, () => renderScan(root));
+      const addNew = () => openForm({ status: 'have', name: guessName(scan.words, pool), color: scan.colour ?? undefined, country: guessedCountry, barcode: pendingBarcode }, () => renderScan(root));
       const head = cands.length ? (cands[0].strong ? t('Looks like this one:') : t('Could it be one of these?')) : t('Not in your list yet.');
       result.innerHTML = `<div class="card"><b>${head}</b>${swatch}${cands.map((c, i) => `<div class="can" data-i="${i}">${thumb(c.can)}<div class="meta"><div class="nm">${esc(c.can.name)}</div><div class="dim sub">${c.can.status === 'have' ? t('In your collection') : t('On your wants list')}</div></div><button class="found" data-pick="${i}">${t('Yes')}</button></div>`).join('')}${countryHint}${read}<button class="${cands.length ? 'secondary' : 'primary'}" id="none" style="width:100%;margin-top:8px">${cands.length ? t('None of these: add as a new can') : t('Add as a new can')}</button></div>`;
       result.querySelector('#none')!.addEventListener('click', addNew);

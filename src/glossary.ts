@@ -43,6 +43,7 @@ export function norm(s: string): string {
     .toLowerCase()
     .replace(/ß/g, 'ss')
     .replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe')
+    .replace(/ł/g, 'l').replace(/đ/g, 'd').replace(/ð/g, 'd').replace(/ı/g, 'i').replace(/þ/g, 'th')
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9\s]+/g, ' ')
     .replace(/\s+/g, ' ')
