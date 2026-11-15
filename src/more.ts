@@ -3,6 +3,8 @@ import { allCans } from './db';
 import { renderDiagnostics, esc } from './diagnostics';
 import { getConfig, setConfig, syncNow, lastSync } from './sync';
 import { t, getLang, setLang, fmtDate, fmtDateTime, cansLabel } from './i18n';
+import { APP_VERSION } from './version';
+import { checkForUpdates } from './sw-register';
 
 export async function renderMore(root: HTMLElement) {
   const n = (await allCans()).length;
@@ -10,6 +12,12 @@ export async function renderMore(root: HTMLElement) {
   const snap = await snapshotInfo();
   const sc = await getConfig(); const ls = await lastSync();
   root.innerHTML = `<h1>${t('More')}</h1>
+    <h2>${t('App update')}</h2>
+    <div class="card update-card">
+      <div class="version-line"><strong>${t('Version {version}', { version: APP_VERSION })}</strong><span class="dim">${t('Can Tracker')}</span></div>
+      <button class="secondary" id="check-updates" style="width:100%;margin-top:10px">${t('Check for updates')}</button>
+      <div id="update-status" class="dim update-status" aria-live="polite">${t('Check whether a newer version is available.')}</div>
+    </div>
     <h2>${t('Language')}</h2>
     <div class="seg"><button type="button" data-lang="en" class="${getLang() === 'en' ? 'on' : ''}">English</button><button type="button" data-lang="nl" class="${getLang() === 'nl' ? 'on' : ''}">Nederlands</button></div>
     <h2>${t('Backup')}</h2>
@@ -40,6 +48,24 @@ export async function renderMore(root: HTMLElement) {
     } catch (e) { if ((e as DOMException)?.name === 'AbortError') return; }
     const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); a.remove();
     await markBackedUp(); renderMore(root);
+  });
+  const updateButton = root.querySelector<HTMLButtonElement>('#check-updates')!;
+  const updateStatus = root.querySelector<HTMLElement>('#update-status')!;
+  updateButton.addEventListener('click', async () => {
+    updateButton.disabled = true;
+    updateStatus.textContent = t('Checking for updates…');
+    try {
+      const result = await checkForUpdates();
+      if (result === 'ready') updateStatus.textContent = t('Update ready. Tap Reload at the top of the screen.');
+      else if (result === 'downloading') updateStatus.textContent = t('A new version was found and is downloading. The update button will appear when it is ready.');
+      else if (result === 'current') updateStatus.textContent = t('You are using the latest version.');
+      else if (result === 'unsupported') updateStatus.textContent = t('Automatic updates are not supported by this browser.');
+      else updateStatus.textContent = t('Could not check for updates. Check your internet connection and try again.');
+    } catch {
+      updateStatus.textContent = t('Could not check for updates. Check your internet connection and try again.');
+    } finally {
+      updateButton.disabled = false;
+    }
   });
   const out = root.querySelector<HTMLElement>('#imp-out')!;
   root.querySelector<HTMLInputElement>('#imp')!.addEventListener('change', async (e) => {
