@@ -1,5 +1,4 @@
-// Front-of-can text reading. Tesseract.js runs in a worker, fully self-hosted (see scripts/copy-ocr.mjs), English model only:
-// all later matching removes accents and uses fuzzy matching, so one Latin-script model covers NL/DE/PL labels well enough.
+// Front-of-can text reading. Tesseract.js runs in a worker, fully self-hosted (see scripts/copy-ocr.mjs), English + Czech models: Czech packaging uses diacritics that the English model often misreads.
 import { dominantColour } from './colour';
 
 export interface OcrWord { text: string; confidence: number; }
@@ -12,7 +11,7 @@ const abs = (p: string) => new URL(p, document.baseURI).href;
 async function worker(onStatus?: (s: string) => void): Promise<Worker> {
   workerP ??= (async () => {
     const { createWorker } = await import('tesseract.js');
-    const w = await createWorker('eng', 1, {
+    const w = await createWorker('eng+ces', 1, {
       workerPath: abs('./ocr/worker.min.js'),
       corePath: abs('./ocr/core/tesseract-core-simd-lstm.wasm.js'),
       langPath: abs('./ocr/lang'),
