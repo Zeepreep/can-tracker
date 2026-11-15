@@ -32,14 +32,14 @@ export function applyStatic() {
   document.documentElement.lang = lang;
   const tabs: Record<string, string> = { scan: 'Scan', collection: 'Collection', wants: 'Wants', more: 'More' };
   document.querySelectorAll<HTMLButtonElement>('#tabs button').forEach((b) => { b.textContent = t(tabs[b.dataset.tab ?? ''] ?? ''); });
-  const bar = document.querySelector('#update-bar span'); if (bar) bar.textContent = t('Update ready');
+  const bar = document.getElementById('update-message'); if (bar) bar.textContent = t('Update available');
   const btn = document.getElementById('update-btn'); if (btn) btn.textContent = t('Reload');
 }
 
 export const NL: Record<string, string> = {
   // tabs / shell
   'Scan': 'Scannen', 'Collection': 'Collectie', 'Wants': 'Zoeklijst', 'More': 'Meer',
-  'Update ready': 'Update beschikbaar', 'Reload': 'Herladen',
+  'Update available': 'Update beschikbaar', 'Update ready': 'Update beschikbaar', 'Reload': 'Herladen',
   'App update': 'App-update', 'Version {version}': 'Versie {version}', 'Check for updates': 'Controleren op updates',
   'Check whether a newer version is available.': 'Controleer of er een nieuwere versie beschikbaar is.',
   'Checking for updates…': 'Controleren op updates…', 'Update ready. Tap Reload at the top of the screen.': 'Update klaar. Tik bovenaan op Herladen.',
