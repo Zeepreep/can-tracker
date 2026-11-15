@@ -1,5 +1,5 @@
 import type { Can } from './types';
-import { norm, expand, synonyms } from './glossary';
+import { GLOSSARY, norm, expand, synonyms } from './glossary';
 import type { OcrWord } from './ocr';
 
 /** Words printed on (nearly) every can: they say nothing about which one it is. */
@@ -12,14 +12,23 @@ export const tokens = (s: string) => norm(s).split(' ').filter((t) => t.length >
 /** Distinctive query tokens from OCR. When a collection is supplied, OCR is corrected
  * against words that actually occur on those cans; unrelated OCR fragments are discarded. */
 export function queryTokens(words: OcrWord[], minConf = 45, catalogue: Can[] = []): string[] {
-  const vocabulary = new Set<string>();
+  // The bundled flavour/colour glossary supplies known label vocabulary even for cans
+  // that are not yet in the user's collection. Collection terms take priority.
+  const canonical = new Map<string, string>();
+  for (const row of GLOSSARY) {
+    const singleWords = row.map((term) => tokens(term)).filter((parts) => parts.length === 1).map((parts) => parts[0]);
+    const root = singleWords[0];
+    for (const token of singleWords) if (!NOISE.has(token) && !canonical.has(token)) canonical.set(token, root);
+  }
+  const vocabulary = new Map<string, string>();
   for (const can of catalogue) {
     const source = [can.name, can.flavor, can.tagline].filter(Boolean).join(' ');
     for (const token of tokens(expand(source))) {
-      if (/^[a-z]+$/.test(token) && !NOISE.has(token)) vocabulary.add(token);
+      if (/^[a-z]+$/.test(token) && !NOISE.has(token)) vocabulary.set(token, canonical.get(token) ?? token);
     }
   }
-  const known = [...vocabulary];
+  for (const [token, root] of canonical) if (!vocabulary.has(token)) vocabulary.set(token, root);
+  const known = [...vocabulary.keys()];
   const out: string[] = [];
   for (const word of words) {
     if (word.confidence < minConf) continue;
@@ -28,12 +37,19 @@ export function queryTokens(words: OcrWord[], minConf = 45, catalogue: Can[] = [
       let corrected = raw;
       if (catalogue.length) {
         let best = 0;
+        let bestRoots = new Set<string>();
         for (const candidate of known) {
           const score = tokenSim(raw, candidate);
-          if (score > best) { best = score; corrected = candidate; }
+          if (score > best) {
+            best = score;
+            bestRoots = new Set([vocabulary.get(candidate) ?? candidate]);
+          } else if (score === best && score > 0) {
+            bestRoots.add(vocabulary.get(candidate) ?? candidate);
+          }
         }
-        // Only accept exact or one/two-character OCR corrections; never guess from a weak fragment.
-        if (best < 0.75) continue;
+        // Ambiguous near-matches are discarded rather than guessed.
+        if (best < 0.75 || bestRoots.size !== 1) continue;
+        corrected = [...bestRoots][0];
       }
       if (!out.includes(corrected)) out.push(corrected);
     }
