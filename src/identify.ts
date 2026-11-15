@@ -24,7 +24,7 @@ export function queryTokens(words: OcrWord[], minConf = 45, catalogue: Can[] = [
   for (const word of words) {
     if (word.confidence < minConf) continue;
     for (const raw of tokens(word.text)) {
-      if (!/^[a-z]+$/.test(raw) || NOISE.has(raw)) continue;
+      if (!(catalogue.length ? /^[a-z0-9]+$/ : /^[a-z]+$/).test(raw) || NOISE.has(raw)) continue;
       let corrected = raw;
       if (catalogue.length) {
         let best = 0;
