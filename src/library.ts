@@ -35,3 +35,19 @@ export function searchLibrary(query: string, names: (s: string) => string = (s) 
   }
   return out;
 }
+
+/** Known tagline wordings for a country (matched by English or translated name), for suggestions in the can form. */
+export function taglinesForCountry(country: string, names: (s: string) => string = (s) => s): string[] {
+  const q = norm(country);
+  if (!q) return [];
+  const out: string[] = [];
+  for (const e of libraryEntries()) {
+    if (e.possibleCountries.some((c) => [c, names(c)].some((n) => norm(n) === q)) && e.display && !out.includes(e.display)) out.push(e.display);
+  }
+  return out;
+}
+
+/** Country names the library knows (for the country suggestions list). */
+export function knownCountries(): string[] {
+  return [...new Set(libraryEntries().flatMap((e) => e.possibleCountries))];
+}

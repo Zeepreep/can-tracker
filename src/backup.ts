@@ -16,7 +16,7 @@ function validCan(x: any): x is Can {
     && (x.status === 'have' || x.status === 'want') && Number.isFinite(x.updatedAt) && Number.isFinite(x.createdAt);
 }
 
-const STR = ['flavor', 'tagline', 'country', 'barcode', 'imageUrl', 'color', 'notes'] as const;
+const STR = ['flavor', 'tagline', 'country', 'barcode', 'imageUrl', 'color', 'size', 'notes'] as const;
 
 /** Parse + validate import text. Never throws; returns errors for the UI. Unknown fields are dropped. */
 export function parseBackup(text: string): { cans: Can[]; skipped: number; error?: string } {

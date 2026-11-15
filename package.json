@@ -15,11 +15,13 @@
     "idb": "^8.0.4",
     "minisearch": "^7.2.0",
     "tesseract.js": "^7.0.0",
+    "three": "^0.187.0",
     "zxing-wasm": "^3.1.6"
   },
   "devDependencies": {
     "@tesseract.js-data/ces": "^1.0.0",
     "@tesseract.js-data/eng": "^1.0.0",
+    "@types/three": "^0.187.0",
     "fake-indexeddb": "^6.2.8",
     "happy-dom": "^21.0.4",
     "typescript": "^7.0.2",

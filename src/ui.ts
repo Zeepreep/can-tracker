@@ -8,13 +8,14 @@ import { queryTokens, rankCans, guessName, countryFromTaglines } from './identif
 import { recognizeTagline } from './country-recognition';
 import { detectLanguage, COUNTRIES, type LangCode } from './lang';
 import { t } from './i18n';
+import { SPECS, SIZE_IDS, DEFAULT_SIZE } from './can3d/specs';
+import { defaultColour } from './can3d/label';
+import { taglinesForCountry, knownCountries } from './library';
 
 export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
 function colorFor(c: Can): string {
-  if (c.color) return c.color;
-  let h = 0; for (const ch of c.name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return `hsl(${h % 360} 45% 38%)`;
+  return c.color || defaultColour(c.name);
 }
 export function thumb(c: Can): string {
   const initials = esc(c.name.replace(/red bull/i, '').trim().slice(0, 2).toUpperCase() || 'RB');
@@ -36,10 +37,14 @@ export function openForm(can: Partial<Can>, done: () => void) {
   const f = (k: keyof Can) => esc(String(can[k] ?? ''));
   sheet.innerHTML = `<div class="sheet-body">
     <h1>${isEdit ? t('Edit can') : t('Add can')}</h1>
+    <div id="viewer" class="viewer" aria-label="${t('3D preview')}"></div>
+    <div class="dim" style="text-align:center;font-size:12px;margin:-4px 0 10px">${t('Drag to rotate. Original generic design: colour, name, tagline and country identify the can.')}</div>
     <label>${t('Name')}<input id="f-name" value="${f('name')}" placeholder="Red Bull Winter Edition Iced Vita Berry" autocapitalize="words"></label>
     <label>${t('Flavor')}<input id="f-flavor" value="${f('flavor')}" placeholder="${t('e.g. Kaktusfeige / cactus fruit')}"></label>
-    <label>${t('Tagline on can')}<input id="f-tagline" value="${f('tagline')}"></label>
-    <label>${t('Country / language')}<input id="f-country" value="${f('country')}" placeholder="${t('Germany')}"></label>
+    <label>${t('Tagline on can')}<input id="f-tagline" list="dl-tag" value="${f('tagline')}"><datalist id="dl-tag"></datalist></label>
+    <label>${t('Country / language')}<input id="f-country" list="dl-country" value="${f('country')}" placeholder="${t('Germany')}"><datalist id="dl-country">${knownCountries().map((c) => `<option value="${esc(c)}">`).join('')}</datalist></label>
+    <label>${t('Size')}<select id="f-size">${SIZE_IDS.map((id) => `<option value="${id}"${(can.size ?? DEFAULT_SIZE) === id ? ' selected' : ''}>${esc(SPECS[id].label)}${SPECS[id].approx ? ' (' + t('estimated') + ')' : ''}</option>`).join('')}</select></label>
+    <label>${t('Colour')}<span style="display:flex;gap:8px;align-items:center"><input id="f-color" type="color" value="${can.color && /^#[0-9a-f]{6}$/i.test(can.color) ? can.color : defaultColour(can.name ?? '')}" style="flex:0 0 64px;padding:2px"><button type="button" class="secondary" id="f-color-auto">${t('Automatic')}</button></span></label>
     <label>${t('Barcode')}<input id="f-barcode" value="${f('barcode')}" inputmode="numeric"></label>
     <label>${t('Notes')}<input id="f-notes" value="${f('notes')}"></label>
     <div class="seg"><button type="button" data-s="have" class="${(can.status ?? 'have') === 'have' ? 'on' : ''}">${t('Have it')}</button><button type="button" data-s="want" class="${can.status === 'want' ? 'on' : ''}">${t('Want it')}</button></div>
@@ -54,7 +59,35 @@ export function openForm(can: Partial<Can>, done: () => void) {
   sheet.querySelectorAll<HTMLButtonElement>('.seg button').forEach((b) => b.addEventListener('click', () => {
     status = b.dataset.s as Status; sheet.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b));
   }));
-  const close = () => sheet.remove();
+  // 3D preview (three.js is loaded lazily so the rest of the app stays light)
+  let viewer: { update(d: import('./can3d/label').LabelData): void; dispose(): void } | null = null;
+  let colourAuto = !can.color || !/^#[0-9a-f]{6}$/i.test(can.color);
+  const colourIn = sheet.querySelector<HTMLInputElement>('#f-color')!;
+  const labelData = () => {
+    const name = val('f-name');
+    return { name: name || 'Energy Drink', flavor: val('f-flavor') || undefined, tagline: val('f-tagline') || undefined, country: val('f-country') || undefined, size: val('f-size'), color: colourAuto ? defaultColour(name) : colourIn.value };
+  };
+  let timer: number | undefined;
+  const refresh = () => {
+    clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      if (colourAuto) colourIn.value = labelData().color;
+      const tl = taglinesForCountry(val('f-country'), t);
+      sheet.querySelector('#dl-tag')!.innerHTML = tl.map((x) => `<option value="${esc(x)}">`).join('');
+      viewer?.update(labelData());
+    }, 150);
+  };
+  sheet.querySelectorAll('#f-name,#f-flavor,#f-tagline,#f-country,#f-size').forEach((el) => el.addEventListener('input', refresh));
+  colourIn.addEventListener('input', () => { colourAuto = false; refresh(); });
+  sheet.querySelector('#f-color-auto')!.addEventListener('click', () => { colourAuto = true; refresh(); });
+  const host = sheet.querySelector<HTMLElement>('#viewer')!;
+  import('./can3d/viewer').then(async (m) => {
+    if (!sheet.isConnected) return;
+    viewer = await m.createViewer(host, labelData());
+    if (!sheet.isConnected) viewer.dispose();
+  }).catch(() => { host.textContent = t('3D preview unavailable'); });
+  refresh();
+  const close = () => { clearTimeout(timer); viewer?.dispose(); viewer = null; sheet.remove(); };
   sheet.querySelector('#f-cancel')!.addEventListener('click', close);
   sheet.querySelector('#f-save')!.addEventListener('click', async () => {
     const err = sheet.querySelector<HTMLElement>('#f-err')!;
@@ -68,7 +101,7 @@ export function openForm(can: Partial<Can>, done: () => void) {
       if (dup && dup.id !== can.id && !confirm(t('"{name}" already has this barcode. Save anyway?', { name: dup.name }))) return;
     }
     try {
-      await saveCan({ ...can, name, flavor: val('f-flavor') || undefined, tagline: val('f-tagline') || undefined, country: val('f-country') || undefined, barcode: barcode ?? undefined, notes: val('f-notes') || undefined, status });
+      await saveCan({ ...can, name, flavor: val('f-flavor') || undefined, tagline: val('f-tagline') || undefined, country: val('f-country') || undefined, barcode: barcode ?? undefined, notes: val('f-notes') || undefined, size: val('f-size') || undefined, color: colourAuto ? can.color && !/^#[0-9a-f]{6}$/i.test(can.color) ? can.color : undefined : colourIn.value, status });
     } catch { err.textContent = t('Could not save. Storage may be full or blocked.'); return; }
     close(); done();
   });

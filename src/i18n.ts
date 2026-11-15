@@ -49,6 +49,8 @@ export const NL: Record<string, string> = {
   'Could not check for updates. Check your internet connection and try again.': 'Controleren op updates is niet gelukt. Controleer je internetverbinding en probeer het opnieuw.',
   // form
   'Edit can': 'Blikje bewerken', 'Add can': 'Blikje toevoegen', 'Name': 'Naam', 'Flavor': 'Smaak',
+  '3D preview': '3D-voorbeeld', 'Drag to rotate. Original generic design: colour, name, tagline and country identify the can.': 'Sleep om te draaien. Eigen algemeen ontwerp: kleur, naam, tekst en land maken het blikje herkenbaar.',
+  'Size': 'Formaat', 'estimated': 'geschat', 'Colour': 'Kleur', 'Automatic': 'Automatisch', '3D preview unavailable': '3D-voorbeeld niet beschikbaar',
   'Tagline on can': 'Tekst op het blikje', 'Country / language': 'Land / taal', 'Barcode': 'Barcode', 'Notes': 'Notities',
   'e.g. Kaktusfeige / cactus fruit': 'bijv. Kaktusfeige / cactusvijg', 'Germany': 'Duitsland',
   'Have it': 'Heb ik', 'Want it': 'Wil ik', 'Save': 'Opslaan', 'Cancel': 'Annuleren', 'Delete': 'Verwijderen',

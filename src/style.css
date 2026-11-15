@@ -45,3 +45,5 @@ nav#tabs button.badge::after { content:' •'; color: var(--warn); }
 .update-status { font-size:13px; margin-top:8px; }
 #check-updates:disabled { opacity:.6; }
 .quote { font-size:17px; font-weight:600; }
+.viewer { width:100%; height:300px; border-radius:14px; background:radial-gradient(circle at 50% 40%, #2a3140, #12161d); margin-bottom:6px; display:flex; align-items:center; justify-content:center; color:#9aa4b5; font-size:13px; overflow:hidden; }
+#f-size, #f-color { width:100%; }

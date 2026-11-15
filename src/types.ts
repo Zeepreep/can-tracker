@@ -9,7 +9,8 @@ export interface Can {
   country?: string;      // where found / label language, free text
   barcode?: string;      // EAN-8/13/UPC digits
   imageUrl?: string;     // Open Food Facts image (hotlinked), never user-uploaded
-  color?: string;        // fallback colour-card, hex
+  color?: string;        // main colour of the can, hex (picked, or read from the photo)
+  size?: string;         // can size id, see can3d/specs.ts (default slim250)
   notes?: string;
   createdAt: number;
   updatedAt: number;
