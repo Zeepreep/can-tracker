@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "description": "Recognizes known Red Bull packaging taglines as language clues. A language match is not proof of country of manufacture, distribution, or purchase.",
+  "entries": [
+    {
+      "id": "en-revitalizes",
+      "language": "English",
+      "phrases": [
+        "revitalizes body and mind",
+        "revitalises body and mind",
+        "vitalizes body and mind",
+        "vitalises body and mind"
+      ],
+      "possibleCountries": []
+    },
+    {
+      "id": "en-wings",
+      "language": "English",
+      "phrases": [
+        "red bull gives you wings",
+        "gives you wings"
+      ],
+      "possibleCountries": []
+    },
+    {
+      "id": "de-wings",
+      "language": "German",
+      "phrases": [
+        "verleiht flügel",
+        "verleiht fluegel"
+      ],
+      "possibleCountries": [
+        "Germany",
+        "Austria",
+        "Switzerland"
+      ]
+    },
+    {
+      "id": "nl-wings",
+      "language": "Dutch",
+      "phrases": [
+        "geeft je vleugels"
+      ],
+      "possibleCountries": [
+        "Netherlands",
+        "Belgium"
+      ]
+    }
+  ]
+}
