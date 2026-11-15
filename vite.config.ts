@@ -21,7 +21,7 @@ function swPlugin(): Plugin {
     configResolved(c) { outDir = c.build.outDir; },
     closeBundle() {
       const files = walk(outDir).filter((f) => !f.endsWith('sw.js') && !f.endsWith('.nojekyll'));
-      const rel = files.map((f) => './' + relative(outDir, f).split('\\').join('/'));
+      const rel = files.map((f) => './' + relative(outDir, f).split('\\').join('/')).filter((f) => !f.startsWith('./ocr/'));
       const h = createHash('sha1');
       for (const f of files.sort()) h.update(f).update(readFileSync(f));
       const version = h.digest('hex').slice(0, 10);

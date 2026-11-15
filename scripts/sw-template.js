@@ -25,6 +25,13 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return; // never cache OFF / GitHub API
+  // Big OCR files: not precached (keeps installs small). Cached the first time they are used, kept across app updates.
+  if (url.pathname.includes('/ocr/')) {
+    e.respondWith(
+      caches.open('ocr-assets').then((c) => c.match(req).then((hit) => hit || fetch(req).then((r) => { if (r.ok) c.put(req, r.clone()); return r; })))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(req, { ignoreSearch: true }).then((hit) => {
       if (hit) return hit;

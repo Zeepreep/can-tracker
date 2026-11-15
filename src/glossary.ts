@@ -18,6 +18,21 @@ export const GLOSSARY: string[][] = [
   ['peach nectarine', 'nectarine', 'nektarine'], ['spiced', 'gekruid', 'gewuerzt'], ['cinnamon', 'kaneel', 'zimt'], ['gingerbread', 'peperkoek', 'lebkuchen'],
   ['forest', 'bos', 'wald'], ['fruit', 'vrucht', 'frucht'], ['winter'], ['summer', 'zomer', 'sommer'], ['spring', 'lente', 'voorjaar', 'fruehling', 'fruhling'],
   ['autumn', 'fall', 'herfst', 'herbst'], ['edition', 'editie', 'ausgabe'], ['limited', 'beperkt', 'limitiert', 'begrenzt'],
+  // elderflower / curuba (Polish cans: "kwiat czarnego bzu"; NB bare "bez" means "without" in Polish, so it is not listed)
+  ['elderflower', 'elder flower', 'vlierbloesem', 'vlier', 'holunderbluete', 'holunderblute', 'holunder', 'kwiat bzu', 'kwiat czarnego bzu', 'czarnego bzu', 'bzu', 'czarny bez'],
+  ['curuba', 'banana passionfruit', 'banaanpassievrucht', 'curuba passionfruit'],
+  // Polish basics (review needed)
+  ['red', 'czerwony', 'czerwona'], ['blue', 'niebieski', 'niebieska'], ['yellow', 'zolty', 'zolta'], ['green', 'zielony', 'zielona'],
+  ['purple', 'fioletowy', 'fioletowa'], ['pink', 'rozowy', 'rozowa'], ['orange', 'pomaranczowy', 'pomarancza'], ['white', 'bialy', 'biala'],
+  ['black', 'czarny', 'czarna'], ['silver', 'srebrny', 'srebrna'],
+  ['apple', 'jablko', 'jablkowy'], ['pear', 'gruszka', 'gruszkowy'], ['cherry', 'wisnia', 'wisniowy'], ['strawberry', 'truskawka', 'truskawkowy'],
+  ['raspberry', 'malina', 'malinowy'], ['blueberry', 'jagoda', 'borowka', 'jagodowy'], ['peach', 'brzoskwinia', 'brzoskwiniowy'],
+  ['apricot', 'morela', 'morelowy'], ['plum', 'sliwka', 'sliwkowy'], ['lemon', 'cytryna', 'cytrynowy'], ['lime', 'limonka'],
+  ['grapefruit', 'grejpfrut'], ['watermelon', 'arbuz', 'arbuzowy'], ['melon', 'melonowy'], ['pineapple', 'ananasowy'],
+  ['coconut', 'kokosowy'], ['cranberry', 'zurawina'], ['pomegranate', 'granat'], ['grape', 'winogrono'], ['banana', 'bananowy'],
+  ['cactus', 'kaktus'], ['dragon fruit', 'smoczy owoc'], ['passion fruit', 'marakuja'], ['tropical', 'tropikalny'], ['fruit', 'owoc', 'owoce'],
+  ['winter', 'zima', 'zimowa'], ['summer', 'lato', 'letnia'], ['spring', 'wiosna', 'wiosenna'], ['autumn', 'jesien', 'jesienna'],
+  ['edition', 'edycja'], ['sugarfree', 'bez cukru', 'bezcukrowy'],
   // tagline words
   ['wings', 'vleugels', 'fluegel', 'flugel'], ['gives you wings', 'geeft je vleugels', 'verleiht fluegel', 'verleiht flugel'],
   ['energy', 'energie'], ['drink', 'drank', 'getraenk', 'getrank'], ['can', 'blik', 'dose'], ['new', 'nieuw', 'neu'], ['taste', 'smaak', 'geschmack'],

@@ -3,6 +3,8 @@ import { allCans, saveCan, deleteCan, restoreCan, markHave, findByBarcode } from
 import { buildIndex, search } from './search';
 import { lookup, cleanBarcode } from './off';
 import { decodePhoto, startLive, type LiveScan } from './scanner';
+import { scanFront } from './ocr';
+import { queryTokens, rankCans, guessName } from './identify';
 
 export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
@@ -122,6 +124,8 @@ export function renderScan(root: HTMLElement) {
     <div id="scan-actions">
       <button class="primary" id="cam-start" style="width:100%">Scan with camera</button>
       <label class="btn secondary filebtn">Take or pick a photo of the barcode<input type="file" id="photo" accept="image/*" capture="environment" hidden></label>
+      <button class="secondary" id="front-btn" style="width:100%;margin:8px 0">Can't scan it? Photograph the front instead</button>
+      <input type="file" id="front" accept="image/*" capture="environment" hidden>
       <div class="typed"><input id="digits" inputmode="numeric" placeholder="Or type the barcode digits"><button class="secondary" id="digits-go">Look up</button></div>
     </div>
     <div id="msg" class="dim"></div><div id="result"></div>`;
@@ -130,7 +134,10 @@ export function renderScan(root: HTMLElement) {
   const cam = root.querySelector<HTMLElement>('#cam')!;
   const actions = root.querySelector<HTMLElement>('#scan-actions')!;
 
+  let pendingBarcode: string | undefined;
+  const tryFront = '<button class="secondary" data-act="front" style="width:100%;margin-top:8px">Try the front of the can instead</button>';
   const handle = async (code: string) => {
+    pendingBarcode = undefined;
     stopScan(); cam.hidden = true; actions.hidden = false; msg.textContent = '';
     if (navigator.vibrate) navigator.vibrate(40);
     const have = await findByBarcode(code);
@@ -139,11 +146,12 @@ export function renderScan(root: HTMLElement) {
       result.querySelector('#found')?.addEventListener('click', async () => { await markHave(have.id); renderScan(root); toast('Added to your collection'); });
       return;
     }
+    pendingBarcode = code;
     result.innerHTML = '<div class="card dim">New barcode. Looking it up…</div>';
     const r = await lookup(code);
     const prefill: Partial<Can> = { barcode: code, status: 'have', name: r.ok ? [r.name].filter(Boolean).join('') : '', imageUrl: r.imageUrl };
     const note = r.ok ? 'Found on Open Food Facts. Check the name and fill in the flavor.' : r.reason === 'notfound' ? 'Not in Open Food Facts. Fill it in yourself.' : r.reason === 'ratelimit' ? 'Lookup is busy right now. Fill it in yourself.' : 'No internet lookup right now. Fill it in yourself.';
-    result.innerHTML = `<div class="card">${r.imageUrl ? thumb(prefill as Can) : ''}<div class="dim">${note}</div><div class="dim">Barcode ${esc(code)}</div><button class="primary" id="addnew" style="width:100%;margin-top:8px">Add this can</button></div>`;
+    result.innerHTML = `<div class="card">${r.imageUrl ? thumb(prefill as Can) : ''}<div class="dim">${note}</div><div class="dim">Barcode ${esc(code)}</div><button class="primary" id="addnew" style="width:100%;margin-top:8px">Add this can</button>${r.ok ? '' : tryFront}</div>`;
     result.querySelector('#addnew')!.addEventListener('click', () => openForm(prefill, () => renderScan(root)));
   };
 
@@ -161,14 +169,48 @@ export function renderScan(root: HTMLElement) {
     msg.textContent = 'Reading barcode…';
     try {
       const c = await decodePhoto(file);
-      if (c) handle(c); else msg.innerHTML = '<span class="warn">No barcode found in that photo. Try closer, flatter and with more light, or type the digits.</span>';
+      if (c) handle(c); else msg.innerHTML = '<span class="warn">No barcode found in that photo. Try closer, flatter and with more light, or type the digits.</span>' + tryFront;
     } catch { msg.innerHTML = '<span class="fail">Could not read that photo. Type the digits instead.</span>'; }
   });
 
   root.querySelector('#cam-start')!.addEventListener('click', async () => {
     result.innerHTML = ''; msg.textContent = 'Starting camera… hold the barcode inside the box.';
     cam.hidden = false; actions.hidden = true;
-    live = await startLive(root.querySelector<HTMLVideoElement>('#vid')!, handle, (m) => { cam.hidden = true; actions.hidden = false; msg.innerHTML = `<span class="warn">${esc(m)}</span>`; });
+    live = await startLive(root.querySelector<HTMLVideoElement>('#vid')!, handle, (m) => { cam.hidden = true; actions.hidden = false; msg.innerHTML = `<span class="warn">${esc(m)}</span>` + tryFront; });
   });
   root.querySelector('#cam-stop')!.addEventListener('click', () => { stopScan(); cam.hidden = true; actions.hidden = false; msg.textContent = ''; });
+
+  /* ----- front-of-can recognition: read text + colour, suggest which can it is ----- */
+  root.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('[data-act=front]')) root.querySelector<HTMLInputElement>('#front')!.click(); });
+  root.querySelector('#front-btn')!.addEventListener('click', () => root.querySelector<HTMLInputElement>('#front')!.click());
+  root.querySelector<HTMLInputElement>('#front')!.addEventListener('change', async (e) => {
+    const input = e.target as HTMLInputElement; const file = input.files?.[0]; if (!file) return;
+    stopScan(); cam.hidden = true; actions.hidden = false; result.innerHTML = '';
+    msg.textContent = 'Reading the can… the first time takes a little longer.';
+    try {
+      const scan = await scanFront(file, (st) => { msg.textContent = st === 'loading language traineddata' || st === 'loading tesseract core' ? 'Loading the text reader (first time only)…' : st === 'reading text' ? 'Reading the text…' : msg.textContent; });
+      msg.textContent = '';
+      const pool = (await allCans()).filter((c) => !c.deleted);
+      const cands = rankCans(queryTokens(scan.words), pool);
+      const readText = scan.words.filter((w) => w.confidence >= 45).map((w) => w.text).join(' ');
+      const read = `<div class="dim" style="font-size:13px;margin-top:6px;word-break:break-word">${readText ? 'I read: ' + esc(readText) : 'I could not read any text. Try again with the label facing the camera and good light.'}</div>`;
+      const swatch = scan.colour ? `<span class="swatch" style="background:${scan.colour}"></span>` : '';
+      const addNew = () => openForm({ status: 'have', name: guessName(scan.words), color: scan.colour ?? undefined, barcode: pendingBarcode }, () => renderScan(root));
+      const head = cands.length ? (cands[0].strong ? 'Looks like this one:' : 'Could it be one of these?') : 'Not in your list yet.';
+      result.innerHTML = `<div class="card"><b>${head}</b>${swatch}${cands.map((c, i) => `<div class="can" data-i="${i}">${thumb(c.can)}<div class="meta"><div class="nm">${esc(c.can.name)}</div><div class="dim sub">${c.can.status === 'have' ? 'In your collection' : 'On your wants list'}</div></div><button class="found" data-pick="${i}">Yes</button></div>`).join('')}${read}<button class="${cands.length ? 'secondary' : 'primary'}" id="none" style="width:100%;margin-top:8px">${cands.length ? 'None of these: add as a new can' : 'Add as a new can'}</button></div>`;
+      result.querySelector('#none')!.addEventListener('click', addNew);
+      result.querySelectorAll<HTMLElement>('[data-pick]').forEach((b) => b.addEventListener('click', async () => {
+        const c = cands[Number(b.dataset.pick)].can;
+        if (pendingBarcode && !c.barcode) await saveCan({ ...c, barcode: pendingBarcode }); // next time the barcode finds it
+        if (c.status === 'want') { await markHave(c.id); toast('Moved to your collection'); }
+        else toast('You already have this one ✓');
+        renderScan(root);
+      }));
+    } catch (err) {
+      msg.innerHTML = '<span class="fail">Could not read the can on this phone. You can still add it by hand.</span>';
+      result.innerHTML = '<div class="card"><button class="primary" id="manual" style="width:100%">Add a can by hand</button></div>';
+      result.querySelector('#manual')!.addEventListener('click', () => openForm({ status: 'have', barcode: pendingBarcode }, () => renderScan(root)));
+    }
+    input.value = '';
+  });
 }
