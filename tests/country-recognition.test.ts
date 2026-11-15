@@ -18,5 +18,8 @@ describe('recognizeTagline', () => {
     expect(recognizeTagline(words('revitalizes', 'energy'))).toBeNull();
     expect(recognizeTagline(words('gives', 'you'))).toBeNull();
   });
+  it('recognizes the Czech Green Edition tagline shown on the reference can photo', () => {
+    expect(recognizeTagline(words('Revitalizuje', 'tělo', 'a', 'mysl'))).toMatchObject({ language: 'Czech', possibleCountries: ['Czechia', 'Slovakia'] });
+  });
   it('returns null for empty OCR', () => { expect(recognizeTagline([])).toBeNull(); });
 });
