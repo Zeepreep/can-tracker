@@ -18,6 +18,7 @@
     "zxing-wasm": "^3.1.6"
   },
   "devDependencies": {
+    "@tesseract.js-data/ces": "^1.0.0",
     "@tesseract.js-data/eng": "^1.0.0",
     "fake-indexeddb": "^6.2.8",
     "happy-dom": "^21.0.4",
